@@ -1,0 +1,356 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Presensi API",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost::8000"
+        }
+    ],
+    "paths": {
+        "api/presensi": {
+            "get": {
+                "description": "Get presensi",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "date",
+                        "in": "query"
+                    },
+                    {
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success search presensi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "number"
+                                                    },
+                                                    "date": {
+                                                        "type": "string"
+                                                    },
+                                                    "entrytime": {
+                                                        "type": "string"
+                                                    },
+                                                    "exittime": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new presensi",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Submit new presensi",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "date": {
+                                        "type": "string"
+                                    },
+                                    "entrytime": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Submit presensi success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "entrytime": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "boolean"
+                                                }
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Presensi out",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Presensi out",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "exittime": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success presensi out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "entrytime": {
+                                                    "type": "string"
+                                                },
+                                                "exittime": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "boolean"
+                                                }
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "api/presensi/{id}": {
+            "get": {
+                "description": "Get detail presensi",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get detail presensi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "entrytime": {
+                                                    "type": "string"
+                                                },
+                                                "exittime": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "boolean"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Presensi out",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Update presensi",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "date": {
+                                        "type": "string"
+                                    },
+                                    "entrytime": {
+                                        "type": "string"
+                                    },
+                                    "exittime": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success presensi out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "entrytime": {
+                                                    "type": "string"
+                                                },
+                                                "exittime": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "boolean"
+                                                }
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Success remove presensi",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete presensi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

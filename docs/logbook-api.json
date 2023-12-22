@@ -1,0 +1,285 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Logbook API",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost::8000"
+        }
+    ],
+    "paths": {
+        "api/logbook": {
+            "get": {
+                "description": "Get logbook",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "date",
+                        "in": "query"
+                    },
+                    {
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success search logbook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "number"
+                                                    },
+                                                    "date": {
+                                                        "type": "string"
+                                                    },
+                                                    "note": {
+                                                        "type": "string"
+                                                    },
+                                                    "image": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new logbook",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Create new logbook",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "date": {
+                                        "type": "string"
+                                    },
+                                    "note": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Create logbook success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "note": {
+                                                    "type": "string"
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "api/logbook/{id}": {
+            "get": {
+                "description": "Get detail logbook",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get detail logbook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "note": {
+                                                    "type": "string"
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update logbook",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Update logbook",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "note": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update logbook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "note": {
+                                                    "type": "string"
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove logbook",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete logbook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
