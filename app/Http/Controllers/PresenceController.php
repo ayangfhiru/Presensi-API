@@ -43,22 +43,65 @@ class PresenceController extends Controller
         return (new PresenceResource($presence))->response()->setStatusCode(201);
     }
 
-    public function getPresence()
+    public function getPresence(Request $request)
     {
         $page = 10;
         $auth = Auth::user();
+        $presence = Presence::where(function (Builder $builder) use ($request) {
+            $status = $request->status;
+            if (isset($status)) {
+                $builder->where(function (Builder $builder) use ($status) {
+                    $builder->orWhere('status', '=', $status);
+                });
+            }
+
+            $dateStart = $request->dateStart;
+            if ($dateStart) {
+                $timeStamp = strtotime($dateStart);
+                $start = round($timeStamp * 1000);
+                $builder->where(function (Builder $builder) use ($start) {
+                    $builder->orWhere('date', '>=', $start);
+                });
+            }
+
+            $dateEnd = $request->dateEnd;
+            if ($dateEnd) {
+                $timeStamp = strtotime($dateEnd);
+                $end = round($timeStamp * 1000);
+                $builder->where(function (Builder $builder) use ($end) {
+                    $builder->orWhere('date', '<=', $end);
+                });
+            }
+
+            $participant = $request->participant;
+            if ($participant) {
+                $builder->whereHas('mentoring.participant', function (Builder $builder) use ($participant) {
+                    $builder->where(function (Builder $builder) use ($participant) {
+                        $builder->orWhere('username', 'like', $participant . '%');
+                    });
+                });
+            }
+        });
+
         if ($auth->role_id == 1) {
-            $presence = Presence::paginate($page);
+            $mentor = $request->mentor;
+            if ($mentor) {
+                $presence = $presence->whereHas('mentoring.mentor', function (Builder $builder) use ($mentor) {
+                    $builder->where(function (Builder $builder) use ($mentor) {
+                        $builder->orWhere('username', 'like', $mentor . '%');
+                    });
+                });
+            }
         }
+
         if ($auth->role_id == 2) {
-            $presence = Presence::with(['mentoring'])
-                ->whereHas('mentoring', function ($query) use ($auth) {
-                    $query->where('mentor_id', '=', $auth->id);
-                })->paginate($page);
+            $presence = $presence->whereHas('mentoring', function (Builder $builder) use ($auth) {
+                $builder->where('mentor_id', '=', $auth->id);
+            });
         }
 
         try {
-            $presence;
+            $presence = $presence->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -176,39 +219,5 @@ class PresenceController extends Controller
         return response()->json([
             'data' => true
         ]);
-    }
-
-    public function searchPresence(Request $request)
-    {
-        $page = $request->input('page', 10);
-        $size = $request->input('size', 10);
-
-        $presence = Presence::query();
-        $presence->where(function (Builder $builder) use ($request) {
-            $id = $request->id;
-            if (isset($id)) {
-                $builder->where('id', '=', $id);
-            }
-
-            $username = $request->username;
-            if (isset($username)) {
-                $builder->where('username', 'like', '%' . $username . '%');
-            }
-
-            $startDate = $request->start;
-            $endDate = $request->end;
-            $between = $builder->where('date', 'between', $startDate, $endDate);
-            if (isset($startDate) && isset($endDate)) {
-                $between;
-            } else {
-                $builder->where('date', '>=', $startDate);
-            }
-
-            $status = $request->status;
-            if (isset($status)) {
-                $builder->where('status', '=', $status);
-            }
-        });
-        $presence = $presence->paginate(perPage: $size, page: $page);
     }
 }

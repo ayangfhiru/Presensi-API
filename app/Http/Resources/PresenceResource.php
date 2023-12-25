@@ -19,8 +19,9 @@ class PresenceResource extends JsonResource
             'date' => $this->date,
             'entry_time' => $this->entry_time,
             'exit_time' => $this->whenNotNull($this->exit_time),
-            'status' => ($this->status == true) ? "on time" : "late",
-            'username' => $this->user->username
+            'status' => $this->status,
+            'participant' => $this->user->username,
+            'mentor' => $this->mentoring->mentor->username
         ];
     }
 }
