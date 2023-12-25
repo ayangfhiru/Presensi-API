@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
 use App\Http\Resources\MentoringResource;
+use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\MentoringAddRequest;
 use App\Http\Requests\MentoringUpdateRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -67,16 +68,34 @@ class MentoringController extends Controller
         return (new MentoringResource($mentoring))->response()->setStatusCode(201);
     }
 
-    public function getMentoring()
+    public function getMentoring(Request $request)
     {
         $page = 10;
         $auth = Auth::user();
+        $mentoring = Mentoring::where(function (Builder $builder) use ($request) {
+            $participant = $request->participant;
+            if ($participant) {
+                $builder->whereHas('participant', function (Builder $builder) use ($participant) {
+                    $builder->where(function (Builder $builder) use ($participant) {
+                        $builder->orWhere('username', 'like', $participant . '%');
+                    });
+                });
+            }
+        });
+
         if ($auth->role_id == 1) {
-            $mentoring = Mentoring::paginate($page);
+            $mentor = $request->mentor;
+            if ($mentor) {
+                $mentoring = $mentoring->whereHas('mentor', function (Builder $builder) use ($mentor) {
+                    $builder->where(function (Builder $builder) use ($mentor) {
+                        $builder->orWhere('username', 'like', $mentor . '%');
+                    });
+                });
+            }
         }
 
         if ($auth->role_id == 2) {
-            $mentoring = Mentoring::where('mentor_id', '=', $auth->id)->paginate($page);
+            $mentoring = $mentoring->where('mentor_id', '=', $auth->id);
         }
 
         if ($auth->role_id == 3) {
@@ -90,7 +109,7 @@ class MentoringController extends Controller
         }
 
         try {
-            $mentoring;
+            $mentoring = $mentoring->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [

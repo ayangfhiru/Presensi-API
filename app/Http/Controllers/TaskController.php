@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Mail\TestEmail;
 use App\Models\Project;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
 use Illuminate\Support\Facades\Auth;
@@ -72,29 +73,72 @@ class TaskController extends Controller
 
         return (new TaskResource($task))->response()->setStatusCode(201);
     }
-    public function getTask()
+    public function getTask(Request $request)
     {
         $page = 10;
         $auth = Auth::user();
+
+        $task = Task::where(function (Builder $builder) use ($request) {
+            $status = $request->status;
+            if (isset($status)) {
+                $builder->where(function (Builder $builder) use ($status) {
+                    $builder->orWhere('status', '=', $status);
+                });
+            }
+
+            $dateStart = $request->dateStart;
+            if ($dateStart) {
+                $timeStamp = strtotime($dateStart);
+                $start = round($timeStamp * 1000);
+                $builder->where(function (Builder $builder) use ($start) {
+                    $builder->orWhere('date', '>=', $start);
+                });
+            }
+
+            $dateEnd = $request->dateEnd;
+            if ($dateEnd) {
+                $timeStamp = strtotime($dateEnd);
+                $end = round($timeStamp * 1000);
+                $builder->where(function (Builder $builder) use ($end) {
+                    $builder->orWhere('date', '<=', $end);
+                });
+            }
+
+            $builder->whereHas('project.mentoring.participant', function (Builder $builder) use ($request) {
+                $participant = $request->participant;
+                if ($participant) {
+                    $builder->where(function (Builder $builder) use ($participant) {
+                        $builder->orWhere('username', 'like', $participant . '%');
+                    });
+                }
+            });
+        });
+
         if ($auth->role_id == 1) {
-            $task = Task::with(['project.mentoring.participant', 'project.mentoring.mentor'])->paginate($page);
+            $task = $task->whereHas('project.mentoring.mentor', function (Builder $builder) use ($request) {
+                $mentor = $request->mentor;
+                if ($mentor) {
+                    $builder->where(function (Builder $builder) use ($mentor) {
+                        $builder->orWhere('username', 'like', $mentor.'%');
+                    });
+                }
+            });
         }
 
         if ($auth->role_id == 2) {
-            $task = Task::with(['project.mentoring.participant', 'project.mentoring.mentor'])
-                    ->whereHas('project.mentoring.mentor', function ($query) use ($auth) {
-                        $query->where('id', '=', $auth->id);
-                    })->paginate($page);
+            $task = $task->whereHas('project.mentoring.mentor', function ($query) use ($auth) {
+                $query->where('id', '=', $auth->id);
+            });
         }
 
         if ($auth->role_id == 3) {
             $task = Task::whereHas('project.mentoring.participant', function ($query) use ($auth) {
                 $query->where('id', '=', $auth->id);
-            })->paginate($page);
+            });
         }
 
         try {
-            $task;
+            $task = $task->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -106,6 +150,52 @@ class TaskController extends Controller
         }
 
         return TaskResource::collection($task);
+    }
+
+    public function detailTask(Request $request)
+    {
+        $auth = Auth::user();
+        $task = Task::where('id', '=', $request->id);
+
+        if ($auth->role_id == 2) {
+            $task = $task->where(function (Builder $builder) use ($auth) {
+                $builder->whereHas('project.mentoring.mentor', function ($query) use ($auth) {
+                    $query->where('id', '=', $auth->id);
+                });
+            });
+        }
+
+        if ($auth->role_id == 3) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'non-admin or mentor role'
+                    ]
+                ]
+            ]);
+        }
+
+        try {
+            $task = $task->first();
+        } catch (QueryException $err) {
+            throw new HttpResponseException(response([
+                'errors' => [
+                    'message' => [
+                        $err->errorInfo[2]
+                    ]
+                ]
+            ], 400));
+        }
+
+        if ($task == null) {
+            return response()->json(['errors' => [
+                'message' => [
+                    'id task wrong'
+                ]
+            ]]);
+        }
+
+        return new TaskResource($task);
     }
 
     public function updateTask(TaskUpdateRequest $request)
@@ -175,7 +265,7 @@ class TaskController extends Controller
             ->find($request->id);
         $mentorId = $task->project->mentoring->mentor->id;
 
-        if ($auth->id == $mentorId || $auth->role_id == 1) {
+        if ($auth->id == $mentorId) {
             try {
                 $task->delete();
             } catch (QueryException $err) {

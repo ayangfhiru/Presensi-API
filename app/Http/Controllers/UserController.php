@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\LoginEmail;
-use App\Models\Division;
 use App\Models\Role;
 use App\Models\User;
-use Exception;
+use App\Mail\LoginEmail;
+use App\Models\Division;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
@@ -14,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\UserRegisterRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
@@ -97,15 +97,21 @@ class UserController extends Controller
     {
         $auth = Auth::user();
         $page = 10;
-        if ($auth->role_id == 1) {
-            $user = User::paginate($page);
-        }
+        $user = User::where(function (Builder $builder) use ($request) {
+            $username = $request->username;
+            if ($username) {
+                $builder->where(function (Builder $builder) use ($username) {
+                    $builder->orWhere('username', 'like', $username . '%');
+                });
+            }
+        });
+
         if ($auth->role_id == 2) {
-            $user = User::with(['participant'])
-                ->whereHas('participant', function ($query) use ($auth) {
-                    $query->where('mentor_id', '=', $auth->id);
-                })->paginate($page);
+            $user = $user->whereHas('participant', function (Builder $builder) use ($auth) {
+                $builder->where('mentor_id', '=', $auth->id);
+            });
         }
+
         if ($auth->role_id == 3) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -117,7 +123,7 @@ class UserController extends Controller
         }
 
         try {
-            $user;
+            $user = $user->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -127,7 +133,6 @@ class UserController extends Controller
                 ]
             ], 400));
         }
-        // return response()->json(['x' => $user]);
         return UserResource::collection($user);
     }
 

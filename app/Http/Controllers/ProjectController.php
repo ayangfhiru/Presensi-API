@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ProjectResource;
 use Illuminate\Database\QueryException;
 use App\Http\Requests\ProjectAddRequest;
+use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\ProjectUpdateRequest;
 use App\Http\Resources\ParticipantMentorResource;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -91,24 +92,66 @@ class ProjectController extends Controller
     public function getProject(Request $request)
     {
         $page = 10;
-        $participant = false;
+        // $noCollection = false;
         $auth = Auth::user();
+
+        $project = Project::where(function (Builder $builder) use ($request) {
+            $status = $request->status;
+            if (isset($status)) {
+                $builder->where(function (Builder $builder) use ($status) {
+                    $builder->orWhere('status', '=', $status);
+                });
+            }
+
+            $dateStart = $request->dateStart;
+            if ($dateStart) {
+                $timeStamp = strtotime($dateStart);
+                $start = round($timeStamp * 1000);
+                $builder->where(function (Builder $builder) use ($start) {
+                    $builder->orWhere('date', '>=', $start);
+                });
+            }
+
+            $dateEnd = $request->dateEnd;
+            if ($dateEnd) {
+                $timeStamp = strtotime($dateEnd);
+                $end = round($timeStamp * 1000);
+                $builder->where(function (Builder $builder) use ($end) {
+                    $builder->orWhere('date', '<=', $end);
+                });
+            }
+
+            $participant = $request->participant;
+            if ($participant) {
+                $builder->whereHas('mentoring.parcipant', function (Builder $builder) use ($participant) {
+                    $builder->where(function (Builder $builder) use ($participant) {
+                        $builder->orWhere('username', 'like', $participant . '%');
+                    });
+                });
+            }
+        });
+
         if ($auth->role_id == 1) {
-            $project = Project::with(['mentoring.participant'])->paginate($page);
+            $mentor = $request->mentor;
+            if ($mentor) {
+                $project = $project->whereHas('mentoring.mentor', function (Builder $builder) use ($mentor) {
+                    $builder->where(function (Builder $builder) use ($mentor) {
+                        $builder->orWhere('username', 'like', $mentor . '%');
+                    });
+                });
+            }
         }
+
         if ($auth->role_id == 2) {
-            $project = Project::with(['mentoring.participant'])
-                ->whereHas('mentoring.mentor', function ($query) use ($auth) {
-                    $query->where('id', '=', $auth->id);
-                })
-                ->paginate($page);
+            $project = $project->whereHas('mentoring.mentor', function ($query) use ($auth) {
+                $query->where('id', '=', $auth->id);
+            });
         }
+
         if ($auth->role_id == 3) {
-            $project = Project::with(['mentoring.participant'])
-                ->whereHas('mentoring.participant', function ($query) use ($auth) {
-                    $query->where('id', '=', $auth->id);
-                })
-                ->latest()->first();
+            $project = $project->whereHas('mentoring.participant', function ($query) use ($auth) {
+                $query->where('id', '=', $auth->id);
+            });
             if ($project == null) {
                 return response()->json(['errors' => [
                     'message' => [
@@ -116,11 +159,11 @@ class ProjectController extends Controller
                     ]
                 ]], 404);
             }
-            $participant = true;
+            // $noCollection = true;
         }
 
         try {
-            $project;
+            $project = $project->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -131,9 +174,9 @@ class ProjectController extends Controller
             ]));
         }
 
-        if ($participant == true) {
-            return new ProjectResource($project);
-        }
+        // if ($noCollection == true) {
+        //     return new ProjectResource($project);
+        // }
         return ProjectResource::collection($project);
     }
     public function updateProject(ProjectUpdateRequest $request)
@@ -155,7 +198,7 @@ class ProjectController extends Controller
         $mentorId = $project->mentoring->mentor->id;
         $data = $request->all();
 
-        if ($auth->id == $mentorId || $auth->role_id == 1) {
+        if ($auth->id == $mentorId) {
             if (isset($request->project)) {
                 $project->project = $request->project;
             }
@@ -200,7 +243,7 @@ class ProjectController extends Controller
             ->find($request->id);
         $mentorId = $project->mentoring->mentor->id;
 
-        if ($auth->id == $mentorId || $auth->role_id == 1) {
+        if ($auth->id == $mentorId) {
             try {
                 $project->delete();
             } catch (QueryException $err) {

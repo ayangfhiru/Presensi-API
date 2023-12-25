@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\QueryException;
 use App\Http\Resources\DivisionResource;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
@@ -48,11 +49,18 @@ class DivisionController extends Controller
         }
         return (new DivisionResource($division))->response()->setStatusCode(201);
     }
-    public function getDivision()
+    public function getDivision(Request $request)
     {
         $page = 10;
+        $division = new Division;
+        $name = $request->name;
+        if ($name) {
+            $division = $division->where(function (Builder $builder) use ($name) {
+                $builder->orWhere('name', 'like', $name.'%');
+            });
+        }
         try {
-            $division = Division::all();
+            $division = $division->get();
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
