@@ -1,39 +1,28 @@
 {
     "openapi": "3.0.2",
     "info": {
-        "title": "Logbook API",
+        "title": "Project API",
         "version": "1.0"
     },
     "servers": [
         {
-            "url": "http://localhost::8000"
+            "url": "https://localhost::8000"
         }
     ],
     "paths": {
-        "api/logbook": {
+        "api/project/participant-mentor": {
             "get": {
-                "description": "Get logbook",
+                "description": "Get participant",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
-                    },
-                    {
-                        "name": "date",
-                        "in": "query"
-                    },
-                    {
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "name": "page",
-                        "in": "query"
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success search logbook",
+                        "description": "Get participant success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -47,51 +36,52 @@
                                                     "id": {
                                                         "type": "number"
                                                     },
-                                                    "date": {
-                                                        "type": "string"
-                                                    },
-                                                    "note": {
-                                                        "type": "string"
-                                                    },
-                                                    "image": {
+                                                    "username": {
                                                         "type": "string"
                                                     }
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
                         }
                     }
                 }
-            },
+            }
+        },
+        "api/project": {
             "post": {
-                "description": "Create new logbook",
+                "description": "Add Project",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "requestBody": {
-                    "description": "Create new logbook",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "required": [
+                                    "project",
+                                    "date",
+                                    "mentoring_id"
+                                ],
                                 "properties": {
+                                    "project": {
+                                        "type": "string"
+                                    },
                                     "date": {
                                         "type": "string"
                                     },
-                                    "note": {
-                                        "type": "string"
-                                    },
-                                    "image": {
-                                        "type": "string"
+                                    "mentoring_id": {
+                                        "type": "number"
                                     }
                                 }
                             }
@@ -100,7 +90,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Create logbook success",
+                        "description": "Add project success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -112,19 +102,95 @@
                                                 "id": {
                                                     "type": "number"
                                                 },
+                                                "project": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
                                                 "date": {
                                                     "type": "string"
                                                 },
-                                                "note": {
+                                                "mentor": {
                                                     "type": "string"
                                                 },
-                                                "image": {
+                                                "participant": {
                                                     "type": "string"
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
+                                        }
+                                    },
+                                    "errors": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "_description": "Get Project",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "name": "dateStart",
+                        "in": "query"
+                    },
+                    {
+                        "name": "dateEnd",
+                        "in": "query"
+                    },
+                    {
+                        "name": "participant",
+                        "in": "query"
+                    },
+                    {
+                        "name": "mentor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success get project",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "number"
+                                                    },
+                                                    "project": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "date": {
+                                                        "type": "string"
+                                                    },
+                                                    "mentor": {
+                                                        "type": "string"
+                                                    },
+                                                    "participant": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -134,78 +200,32 @@
                 }
             }
         },
-        "api/logbook/{id}": {
-            "get": {
-                "description": "Get detail logbook",
-                "parameters": [
-                    {
-                        "name": "Autorization",
-                        "in": "header"
-                    },
-                    {
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Get detail logbook",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "number"
-                                                },
-                                                "date": {
-                                                    "type": "string"
-                                                },
-                                                "note": {
-                                                    "type": "string"
-                                                },
-                                                "image": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
+        "api/project/{id}": {
             "put": {
-                "description": "Update logbook",
+                "description": "Update project",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "name": "id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "requestBody": {
-                    "description": "Update logbook",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "note": {
+                                    "project": {
                                         "type": "string"
                                     },
-                                    "image": {
-                                        "type": "string"
+                                    "status": {
+                                        "type": "boolean"
                                     }
                                 }
                             }
@@ -214,7 +234,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Success update logbook",
+                        "description": "Update project success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -226,20 +246,26 @@
                                                 "id": {
                                                     "type": "number"
                                                 },
+                                                "project": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
                                                 "date": {
                                                     "type": "string"
                                                 },
-                                                "note": {
+                                                "mentor": {
                                                     "type": "string"
                                                 },
-                                                "image": {
+                                                "participant": {
                                                     "type": "string"
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -248,20 +274,22 @@
                 }
             },
             "delete": {
-                "description": "Remove logbook",
+                "description": "Delete project",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "name": "id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success delete logbook",
+                        "description": "Success delete project",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -269,10 +297,10 @@
                                     "properties": {
                                         "data": {
                                             "type": "boolean"
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }

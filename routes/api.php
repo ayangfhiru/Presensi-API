@@ -23,11 +23,6 @@ use App\Http\Controllers\MentoringController;
 */
 
 Route::middleware('auth:sanctum')->group(function () {
-    // Route::post('role', [RoleController::class, 'addRole']);
-    // Route::get('role', [RoleController::class, 'getRole']);
-    // Route::put('role/{id}', [RoleController::class, 'updateRole']);
-    // Route::delete('role/{id}', [RoleController::class, 'deleteRole']);
-
     Route::post('division', [DivisionController::class, 'addDivision']);
     Route::delete('division/{id}', [DivisionController::class, 'deleteDivision']);
     

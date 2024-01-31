@@ -14,21 +14,55 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class PresenceController extends Controller
 {
+    public function dateToEpoch($request) {
+        $timeStamp = strtotime($request);
+        $timeToEpoch = round($timeStamp * 1000);
+        return $timeToEpoch;
+    }
+
+    public function epochToDate($request) {
+        $epoch = $request / 1000;
+        $convert = new \DateTime("@$epoch");
+        return $convert;
+    }
+
     public function addPresence(PresenceRequest $request)
     {
         $request->validated();
         $user = Auth::user();
         $mentoring = Mentoring::where('participant_id', '=', $user->id)->first();
-        $entry = date('H:i:s', ($request->entry_time / 1000));
+        $maxTime = '08:30:00';
+        $timeEntry = $this->dateToEpoch($request->entry_time);
+        $time = date('H:i:s', ($timeEntry / 1000));
         $status = false;
-        if ($entry <= '08:30:00') {
+        if ($time <= $maxTime) {
             $status = true;
         }
+        
+        $presence = new Presence();
+        $date = $this->dateToEpoch($request->date);
+        $entry = $this->dateToEpoch($request->entry_time);
+        $exit = $this->dateToEpoch($request->exit_time);
+        
+        if (!$request->exit_time) {
+            $presence->date = $date;
+            $presence->entry_time = $entry;
+            $presence->user_id = $user->id;
+            $presence->mentoring_id = $mentoring->id;
+            $presence->status = $status;
+        }
+        
+        if ($request->exit_time) {
+            $presence = Presence::where('user_id', '=', $user->id)->orderBy('id', 'desc')->first();
+            $datePresence = $this->epochToDate($presence->date);
+            $resPresence = $datePresence->format('Y-m-d');
+            $dateExit = $this->dateToEpoch($request->exit_time);
+            $resExit = date('Y-m-d', $dateExit / 1000);
+            if ($resExit == $resPresence) {
+                $presence->exit_time = $exit;
+            }   
+        }
 
-        $presence = new Presence($request->all());
-        $presence->user_id = $user->id;
-        $presence->mentoring_id = $mentoring->id;
-        $presence->status = $status;
         try {
             $presence->save();
         } catch (QueryException $err) {
@@ -100,6 +134,12 @@ class PresenceController extends Controller
             });
         }
 
+        if ($auth->role_id == 3) {
+            $presence = $presence->whereHas('mentoring', function (Builder $builder) use ($auth) {
+                $builder->where('participant_id', '=', $auth->id);
+            });
+        }
+
         try {
             $presence = $presence->paginate($page);
         } catch (QueryException $err) {
@@ -116,11 +156,10 @@ class PresenceController extends Controller
 
     public function getDetailPresence(Request $request)
     {
-        $page = 10;
         $auth = Auth::user();
         if ($auth->role_id == 1 || $auth->role_id == 2) {
             try {
-                $presence = Presence::find($request->id)->paginate($page);
+                $presence = Presence::find($request->id);
             } catch (QueryException $err) {
                 throw new HttpResponseException(response([
                     'errors' => [
@@ -139,7 +178,7 @@ class PresenceController extends Controller
                 ]
             ], 400));
         }
-        return PresenceResource::collection($presence);
+        return new PresenceResource($presence);
     }
 
     public function updatePresence(PresenceRequest $request)

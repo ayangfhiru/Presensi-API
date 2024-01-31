@@ -16,7 +16,8 @@
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "requestBody": {
@@ -52,9 +53,6 @@
                                                     "type": "string"
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
                                     }
                                 }
@@ -67,8 +65,8 @@
                 "description": "Get divisi",
                 "parameters": [
                     {
-                        "name": "Autorization",
-                        "in": "header"
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -102,72 +100,18 @@
             }
         },
         "api/divisi/{id}": {
-            "_put": {
-                "description": "Update divisi",
-                "parameters": [
-                    {
-                        "name": "Autorization",
-                        "in": "header"
-                    },
-                    {
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "requestBody": {
-                    "description": "Update divisi",
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object", 
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Success Update divisi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "number"
-                                                },
-                                                "name": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Remove data divisi",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "name": "id",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -180,9 +124,6 @@
                                     "properties": {
                                         "data": {
                                             "type": "boolean"
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
                                     }
                                 }

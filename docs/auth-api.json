@@ -1,30 +1,32 @@
 {
-    "openapi":"3.0.2",
+    "openapi": "3.0.2",
     "info": {
-      "title":"Role API",
-      "version":"1.0"
+        "title": "Auth API",
+        "version": "1.0"
     },
     "servers": [
-      {"url":"http://localhost::8000"}
+        {
+            "url": "https://localhost::8000"
+        }
     ],
     "paths": {
-        "api/role": {
+        "api/accout/login": {
             "post": {
-                "description": "Create new role",
-                "parameters": [
-                    {
-                        "name": "Autorization",
-                        "in": "header"
-                    }
-                ],
+                "description": "User login",
                 "requestBody": {
-                    "description": "Create new role",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
-                                    "name": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
                                         "type": "string"
                                     }
                                 }
@@ -33,8 +35,8 @@
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Create new role success",
+                    "200": {
+                        "description": "Login success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -46,51 +48,29 @@
                                                 "id": {
                                                     "type": "number"
                                                 },
-                                                "name": {
+                                                "username": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string"
+                                                },
+                                                "phone": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "division": {
+                                                    "type": "string"
+                                                },
+                                                "token": {
                                                     "type": "string"
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "get": {
-                "description": "Get role",
-                "parameters": [
-                    {
-                        "name": "Autorization",
-                        "in": "header"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success get role",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "number"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
-                                        }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -99,27 +79,84 @@
                 }
             }
         },
-        "api/role/{id}": {
-            "put": {
-                "description": "Update role",
+        "api/account/detail": {
+            "get": {
+                "description": "Get user",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
-                    },
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success get detail user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "number"
+                                                    },
+                                                    "username": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string"
+                                                    },
+                                                    "role": {
+                                                        "type": "string"
+                                                    },
+                                                    "division": {
+                                                        "type": "string"
+                                                    }
+                                            }
+                                        }
+                                    },
+                                    "errors": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "api/account/update": {
+            "post": {
+                "description": "Update user",
+                "parameters": [
                     {
-                        "name": "id",
-                        "in": "path"
+                        "name": "Autorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "requestBody": {
-                    "description": "Update role",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "name": {
+                                    "username": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "password": {
                                         "type": "string"
                                     }
                                 }
@@ -129,7 +166,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Success update role",
+                        "description": "Update success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -141,36 +178,47 @@
                                                 "id": {
                                                     "type": "number"
                                                 },
-                                                "name": {
+                                                "username": {
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "type": "string"
+                                                },
+                                                "phone": {
+                                                    "type": "string"
+                                                },
+                                                "role": {
+                                                    "type": "string"
+                                                },
+                                                "division": {
                                                     "type": "string"
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
                         }
                     }
                 }
-            },
+            }
+        },
+        "api/account/logout": {
             "delete": {
-                "description": "Remove data role",
+                "description": "User logout",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
-                    },
-                    {
-                        "name": "id",
-                        "in": "path"
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success delete role",
+                        "description": "Success logout user",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -178,10 +226,10 @@
                                     "properties": {
                                         "data": {
                                             "type": "boolean"
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -191,4 +239,4 @@
             }
         }
     }
-  }
+}

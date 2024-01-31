@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskDetailResource;
 use App\Models\Task;
 use App\Mail\TestEmail;
 use App\Models\Project;
@@ -195,7 +196,7 @@ class TaskController extends Controller
             ]]);
         }
 
-        return new TaskResource($task);
+        return new TaskDetailResource($task);
     }
 
     public function updateTask(TaskUpdateRequest $request)
@@ -203,14 +204,14 @@ class TaskController extends Controller
         $request->validated();
         $auth = Auth::user();
 
-        if ($auth->role_id != 2) {
+        if ($auth->role_id == 1) {
             return response()->json([
                 'errors' => [
                     'message' => [
-                        'non-mentor role'
+                        'non-mentor or participant role'
                     ]
                 ]
-            ]);
+            ], 400);
         }
 
         $task = Task::with(['project.mentoring.mentor'])
@@ -224,25 +225,51 @@ class TaskController extends Controller
             ]], 400);
         }
 
-        $mentorId = $task->project->mentoring->mentor->id;
-        if ($mentorId != $auth->id) {
-            return response()->json([
-                'errors' => [
-                    'message' => [
-                        'participant failed'
+        $mentoring = $task->project->mentoring;
+        $mentorId = $mentoring->mentor->id;
+        $participantId = $mentoring->participant->id;
+
+        if ($auth->role_id == 2) {
+            if ($mentorId == $auth->id) {
+                if (isset($request->status)) {
+                    $task->status = $request->status;
+                }
+                if ($request->date) {
+                    $timeStamp = strtotime($request->date);
+                    $milliseconds = round($timeStamp * 1000);
+                    $task->date = $milliseconds;
+                }
+            } else {
+                return response()->json([
+                    'errors' => [
+                        'message' => [
+                            'mentor failed'
+                        ]
                     ]
-                ]
-            ]);
+                ], 400);
+            }
         }
 
-        if (isset($request->note)) {
-            $task->note = $request->note;
-        }
-        if ($request->file('image')) {
-            $file = $request->file('image');
-            $fileName = date('YmdHi') . $file->getClientOriginalName();
-            $image = $file->storeAs('task-images', $fileName);
-            $task->image = $image;
+        if($auth->role_id == 3) {
+            if ($participantId == $auth->id && $task->status == 0) {
+                if (isset($request->note)) {
+                    $task->note = $request->note;
+                }
+                if ($request->file('image')) {
+                    $file = $request->file('image');
+                    $fileName = date('YmdHi') . $file->getClientOriginalName();
+                    $image = $file->storeAs('task-images', $fileName);
+                    $task->image = $image;
+                }
+            } else {
+                return response()->json([
+                    'errors' => [
+                        'message' => [
+                            'can not update'
+                        ]
+                    ]
+                ], 400);
+            }
         }
 
         try {
@@ -256,11 +283,23 @@ class TaskController extends Controller
                 ]
             ], 400));
         }
+
+        return new TaskResource($task);
     }
 
     public function deleteTask(Request $request)
     {
         $auth = Auth::user();
+        if ($auth->role_id != 2) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'non-mentor role'
+                    ]
+                ]
+            ], 400);
+        }
+
         $task = Task::with(['project.mentoring.mentor'])
             ->find($request->id);
         $mentorId = $task->project->mentoring->mentor->id;
