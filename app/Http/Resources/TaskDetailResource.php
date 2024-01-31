@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\URL;
 
-class TaskResource extends JsonResource
+class TaskDetailResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,9 +19,12 @@ class TaskResource extends JsonResource
             'id' => $this->id,
             'note' => $this->note,
             'date' => $this->date,
-            'image' => $this->image ? URL::to('/storage').'/'.$this->image : null,
+            'image' => $this->image ? URL::to('/storage') . '/' . $this->image : null,
             'status' => $this->status,
-            'project' => $this->project->project
+            'project' => $this->project->project,
+            'projectDate' => $this->project->date,
+            'participant' => $this->project->mentoring->participant->username,
+            'mentor' => $this->project->mentoring->mentor->username,
         ];
     }
 }

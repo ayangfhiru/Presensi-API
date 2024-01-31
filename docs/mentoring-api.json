@@ -1,33 +1,40 @@
 {
     "openapi": "3.0.2",
     "info": {
-        "title": "Tugas API",
+        "title": "Mentoring API",
         "version": "1.0"
     },
     "servers": [
         {
-            "url": "http://localhost::8000"
+            "url": "https://localhost::8000"
         }
     ],
     "paths": {
-        "/api/task": {
+        "api/mentoring": {
             "post": {
-                "description": "Create new tugas",
+                "description": "Add Mentoring",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "requestBody": {
-                    "description": "Create new task",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "required": [
+                                    "mentor_id",
+                                    "participant_id"
+                                ],
                                 "properties": {
-                                    "task": {
-                                        "type": "string"
+                                    "mentor_id": {
+                                        "type": "number"
+                                    },
+                                    "participant_id": {
+                                        "type": "number"
                                     }
                                 }
                             }
@@ -36,7 +43,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Success create new task",
+                        "description": "Add mentoring success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -48,17 +55,17 @@
                                                 "id": {
                                                     "type": "number"
                                                 },
-                                                "task": {
+                                                "mentor": {
                                                     "type": "string"
                                                 },
-                                                "status": {
-                                                    "type": "boolean"
+                                                "participant": {
+                                                    "type": "string"
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -67,28 +74,25 @@
                 }
             },
             "get": {
-                "description": "Get task",
+                "description": "Get mentoring",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
-                        "name": "status",
+                        "name": "participant",
                         "in": "query"
                     },
                     {
-                        "name": "size",
-                        "in": "query"
-                    },
-                    {
-                        "name": "page",
+                        "name": "mentor",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Get data task",
+                        "description": "Success get mentoring",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -102,17 +106,14 @@
                                                     "id": {
                                                         "type": "number"
                                                     },
-                                                    "task": {
+                                                    "mentor": {
                                                         "type": "string"
                                                     },
-                                                    "status": {
-                                                        "type": "boolean"
+                                                    "participant": {
+                                                        "type": "string"
                                                     }
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
                                     }
                                 }
@@ -122,75 +123,32 @@
                 }
             }
         },
-        "api/task/{id}": {
-            "get": {
-                "description": "Get detail task",
-                "parameters": [
-                    {
-                        "name": "Autorization",
-                        "in": "header"
-                    },
-                    {
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Get detail task",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "number"
-                                                },
-                                                "task": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "boolean"
-                                                }
-                                            }
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
+        "api/mentoring/{id}": {
             "put": {
-                "description": "Update task",
+                "description": "Update mentoring",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "name": "id",
-                        "in": "query"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "requestBody": {
-                    "description": "Update task",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "task": {
-                                        "type": "string"
+                                    "mentor_id": {
+                                        "type": "number"
                                     },
-                                    "status": {
-                                        "type": "boolean"
+                                    "participant_id": {
+                                        "type": "number"
                                     }
                                 }
                             }
@@ -199,7 +157,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Success update task",
+                        "description": "Update mentoring success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -211,17 +169,17 @@
                                                 "id": {
                                                     "type": "number"
                                                 },
-                                                "task": {
+                                                "mentor": {
                                                     "type": "string"
                                                 },
-                                                "status": {
-                                                    "type": "boolean"
+                                                "participant": {
+                                                    "type": "string"
                                                 }
                                             }
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -230,20 +188,22 @@
                 }
             },
             "delete": {
-                "description": "Remove task",
+                "description": "Get user",
                 "parameters": [
                     {
                         "name": "Autorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "name": "id",
-                        "in": "query"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success update task",
+                        "description": "Success delete mentoring",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -251,10 +211,10 @@
                                     "properties": {
                                         "data": {
                                             "type": "boolean"
-                                        },
-                                        "errors": {
-                                            "type": "object"
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }

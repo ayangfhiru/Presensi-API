@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.2",
     "info": {
-        "title": "Presensi API",
+        "title": "Logbook API",
         "version": "1.0"
     },
     "servers": [
@@ -10,9 +10,9 @@
         }
     ],
     "paths": {
-        "api/presence": {
+        "api/task": {
             "post": {
-                "description": "Create new presensi",
+                "description": "Create new logbook",
                 "parameters": [
                     {
                         "name": "Autorization",
@@ -21,24 +21,21 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Submit new presensi",
+                    "description": "Create new logbook",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "required": [
-                                    "date",
-                                    "entry_time"
-                                ],
                                 "properties": {
                                     "date": {
                                         "type": "string"
                                     },
-                                    "entry_time": {
+                                    "note": {
                                         "type": "string"
                                     },
-                                    "exit_time": {
-                                        "type": "string"
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 }
                             }
@@ -47,7 +44,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Submit presensi success",
+                        "description": "Create logbook success",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -62,19 +59,10 @@
                                                 "date": {
                                                     "type": "string"
                                                 },
-                                                "entry_time": {
+                                                "note": {
                                                     "type": "string"
                                                 },
-                                                "exit_time": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "boolean"
-                                                },
-                                                "participant": {
-                                                    "type": "string"
-                                                },
-                                                "mentor": {
+                                                "image": {
                                                     "type": "string"
                                                 }
                                             }
@@ -90,7 +78,7 @@
                 }
             },
             "get": {
-                "_description": "Get Presensi",
+                "description": "Get logbook",
                 "parameters": [
                     {
                         "name": "Autorization",
@@ -120,7 +108,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success get presensi",
+                        "description": "Success search logbook",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -134,22 +122,19 @@
                                                     "id": {
                                                         "type": "number"
                                                     },
+                                                    "note": {
+                                                        "type": "string"
+                                                    },
                                                     "date": {
                                                         "type": "string"
                                                     },
-                                                    "entry_time": {
-                                                        "type": "string"
-                                                    },
-                                                    "exit_time": {
+                                                    "image": {
                                                         "type": "string"
                                                     },
                                                     "status": {
                                                         "type": "boolean"
                                                     },
-                                                    "participant": {
-                                                        "type": "string"
-                                                    },
-                                                    "mentor": {
+                                                    "project": {
                                                         "type": "string"
                                                     }
                                                 }
@@ -166,9 +151,9 @@
                 }
             }
         },
-        "api/presence/{id}": {
+        "api/task/{id}": {
             "get": {
-                "description": "Get detail presensi",
+                "description": "Get detail logbook",
                 "parameters": [
                     {
                         "name": "Autorization",
@@ -183,7 +168,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Get detail presensi",
+                        "description": "Get detail logbook",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -195,17 +180,23 @@
                                                 "id": {
                                                     "type": "number"
                                                 },
+                                                "note": {
+                                                    "type": "string"
+                                                },
                                                 "date": {
                                                     "type": "string"
                                                 },
-                                                "entry_time": {
-                                                    "type": "string"
-                                                },
-                                                "exit_time": {
+                                                "image": {
                                                     "type": "string"
                                                 },
                                                 "status": {
                                                     "type": "boolean"
+                                                },
+                                                "project": {
+                                                    "type": "string"
+                                                },
+                                                "projectDate": {
+                                                    "type": "string"
                                                 },
                                                 "participant": {
                                                     "type": "string"
@@ -215,6 +206,127 @@
                                                 }
                                             }
                                         }
+                                    },
+                                    "errors": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update logbook",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "Update logbook",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "note": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update logbook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "number"
+                                                },
+                                                "note": {
+                                                    "type": "string"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "image": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "project": {
+                                                    "type": "string"
+                                                },
+                                                "projectDate": {
+                                                    "type": "string"
+                                                },
+                                                "participant": {
+                                                    "type": "string"
+                                                },
+                                                "mentor": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "errors": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove logbook",
+                "parameters": [
+                    {
+                        "name": "Autorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete logbook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "errors": {
+                                        "type": "object"
                                     }
                                 }
                             }
