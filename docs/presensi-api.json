@@ -90,7 +90,7 @@
                 }
             },
             "get": {
-                "_description": "Get Presensi",
+                "description": "Get Presensi",
                 "parameters": [
                     {
                         "name": "Autorization",

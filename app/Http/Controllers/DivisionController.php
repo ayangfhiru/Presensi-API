@@ -49,6 +49,7 @@ class DivisionController extends Controller
         }
         return (new DivisionResource($division))->response()->setStatusCode(201);
     }
+    
     public function getDivision(Request $request)
     {
         $page = 10;

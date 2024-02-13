@@ -41,6 +41,7 @@ class ProjectController extends Controller
         }
         return ParticipantMentorResource::collection($mentoring);
     }
+    
     public function addProject(ProjectAddRequest $request)
     {
         $request->validated();
@@ -179,6 +180,7 @@ class ProjectController extends Controller
         // }
         return ProjectResource::collection($project);
     }
+    
     public function updateProject(ProjectUpdateRequest $request)
     {
         $request->validated();

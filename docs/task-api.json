@@ -12,7 +12,7 @@
     "paths": {
         "api/task": {
             "post": {
-                "description": "Create new logbook",
+                "_description": "Create new logbook",
                 "parameters": [
                     {
                         "name": "Autorization",
@@ -26,6 +26,11 @@
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "required": [
+                                    "date",
+                                    "note",
+                                    "project_id"
+                                ],
                                 "properties": {
                                     "date": {
                                         "type": "string"
@@ -36,6 +41,9 @@
                                     "image": {
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "project_id": {
+                                        "type": "number"
                                     }
                                 }
                             }
@@ -217,7 +225,7 @@
                 }
             },
             "put": {
-                "description": "Update logbook",
+                "_description": "Update logbook",
                 "parameters": [
                     {
                         "name": "Autorization",
@@ -231,12 +239,18 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Update logbook",
+                    "_description": "Update logbook",
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
+                                    "status": {
+                                        "type": "boolean"
+                                    },
+                                    "date": {
+                                        "type": "string"
+                                    },
                                     "note": {
                                         "type": "string"
                                     },
@@ -276,15 +290,6 @@
                                                     "type": "boolean"
                                                 },
                                                 "project": {
-                                                    "type": "string"
-                                                },
-                                                "projectDate": {
-                                                    "type": "string"
-                                                },
-                                                "participant": {
-                                                    "type": "string"
-                                                },
-                                                "mentor": {
                                                     "type": "string"
                                                 }
                                             }

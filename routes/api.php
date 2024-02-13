@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\MailController;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProjectController;
@@ -52,7 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('task/{id}', [TaskController::class, 'deleteTask']);
     
     Route::get('account/detail', [AuthController::class, 'detailAccount']);
-    Route::post('account/update', [AuthController::class, 'updateAccount']);
+    Route::put('account/update', [AuthController::class, 'updateAccount']);
     Route::delete('account/logout', [AuthController::class, 'logout']);
 });
 

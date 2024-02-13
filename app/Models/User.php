@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\Role;
-use App\Models\Logbook;
 use App\Models\Division;
 use App\Models\Presence;
 use App\Models\Mentoring;
