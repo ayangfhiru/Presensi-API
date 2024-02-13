@@ -24,13 +24,6 @@ return new class extends Migration
             $table->foreign('role_id')->on('roles')->references('id');
             $table->foreign('division_id')->on('divisions')->references('id');
         });
-
-        // DB::table('users')->insert([
-        //     'username' => 'administrator',
-        //     'email' => 'xyz@xample.com',
-        //     'password' => Hash::make('admin123'),
-        //     'role_id' => 1
-        // ]);
     }
 
     /**

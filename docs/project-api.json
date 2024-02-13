@@ -130,7 +130,7 @@
                 }
             },
             "get": {
-                "_description": "Get Project",
+                "description": "Get Project",
                 "parameters": [
                     {
                         "name": "Autorization",

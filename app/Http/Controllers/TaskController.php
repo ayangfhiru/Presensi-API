@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TaskDetailResource;
 use App\Models\Task;
-use App\Mail\TestEmail;
 use App\Models\Project;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Resources\TaskResource;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\TaskAddRequest;
 use Illuminate\Database\QueryException;
 use App\Http\Requests\TaskUpdateRequest;
@@ -74,6 +72,7 @@ class TaskController extends Controller
 
         return (new TaskResource($task))->response()->setStatusCode(201);
     }
+    
     public function getTask(Request $request)
     {
         $page = 10;

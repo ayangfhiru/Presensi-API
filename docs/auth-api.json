@@ -132,7 +132,7 @@
             }
         },
         "api/account/update": {
-            "post": {
+            "put": {
                 "description": "Update user",
                 "parameters": [
                     {

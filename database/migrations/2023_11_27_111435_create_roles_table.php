@@ -15,12 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name', 30)->nullable(false)->unique('role_name_unique');
         });
-
-        // DB::table('roles')->insert([
-        //     ['name' => 'admin'],
-        //     ['name' => 'mentor'],
-        //     ['name' => 'participant']
-        // ]);
     }
 
     /**
