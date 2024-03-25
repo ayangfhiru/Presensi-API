@@ -16,10 +16,10 @@ class AuthController extends Controller
 {
     public function login(UserLoginRequest $request)
     {
-        $data = $request->validated();
+        $request->validated();
 
-        $user = User::where('email', $data['email'])->first();
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        $user = User::where('email', $request['email'])->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
             throw new HttpResponseException(response([
                 'errors' => [
                     'message' => [
@@ -37,11 +37,19 @@ class AuthController extends Controller
     public function updateAccount(UserUpdateRequest $request)
     {
         $request->validated();
+        if ($request->validated() == null) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'enter the data you want to update!'
+                    ]
+                ]
+            ], 400);
+        }
         $user = Auth::user();
 
-
-        if (isset($request->username)) {
-            $user->username = $request->username;
+        if (isset($request->name)) {
+            $user->name = $request->name;
         }
         if (isset($request->email)) {
             $user->email = $request->email;

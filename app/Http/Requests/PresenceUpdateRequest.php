@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class PresenceRequest extends FormRequest
+class PresenceUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,11 +24,11 @@ class PresenceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['required'],
-            'entry_time' => ['required']
+            'date' => ['nullable'],
+            'entry_time' => ['nullable'],
+            'exit_time' => ['nullable']
         ];
     }
-
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response([

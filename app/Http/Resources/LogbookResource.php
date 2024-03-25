@@ -4,9 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\URL;
 
-class TaskResource extends JsonResource
+class LogbookResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,8 +18,6 @@ class TaskResource extends JsonResource
             'id' => $this->id,
             'note' => $this->note,
             'date' => $this->date,
-            'image' => $this->image ? URL::to('/storage').'/'.$this->image : null,
-            'status' => $this->status,
             'project' => $this->project->project
         ];
     }

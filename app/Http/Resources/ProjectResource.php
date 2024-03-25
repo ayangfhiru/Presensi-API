@@ -19,8 +19,8 @@ class ProjectResource extends JsonResource
             'project' => $this->project,
             'status' => $this->status ? true : false,
             'date' => $this->date,
-            'mentor' => $this->whenNotNull($this->mentoring->mentor->username),
-            'participant' => $this->whenNotNull($this->mentoring->participant->username)
+            'mentor' => $this->whenNotNull($this->mentoring->mentor->name),
+            'participant' => $this->whenNotNull($this->mentoring->participant->name)
         ];
     }
 }

@@ -18,8 +18,8 @@ class ProjectController extends Controller
 {
     public function getParticipantMentor(Request $request)
     {
-        $auth = Auth::user();
-        if ($auth->role_id != 2) {
+        $user = Auth::user();
+        if ($user->role_id != 2) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -28,8 +28,14 @@ class ProjectController extends Controller
                 ]
             ], 400);
         }
+
+        $mentoring = Mentoring::with('participant:id,username')->where('mentorings.mentor_id', '=', $user->id);
+        $mentoring->whereHas('participant', function (Builder $builder) {
+            $builder->where('status', '=', true);
+        });
+
         try {
-            $mentoring = Mentoring::with('participant:id,username')->where('mentorings.mentor_id', '=', $auth->id)->get();
+            $mentoring = $mentoring->get();
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -41,12 +47,12 @@ class ProjectController extends Controller
         }
         return ParticipantMentorResource::collection($mentoring);
     }
-    
+
     public function addProject(ProjectAddRequest $request)
     {
         $request->validated();
-        $auth = Auth::user();
-        if ($auth->role_id != 2) {
+        $user = Auth::user();
+        if ($user->role_id != 2) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -57,7 +63,7 @@ class ProjectController extends Controller
         }
 
         $mentoring = Mentoring::where('id', '=', $request->mentoring_id)->first();
-        if ($auth->id != $mentoring->mentor_id) {
+        if ($user->id != $mentoring->mentor_id) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -93,8 +99,7 @@ class ProjectController extends Controller
     public function getProject(Request $request)
     {
         $page = 10;
-        // $noCollection = false;
-        $auth = Auth::user();
+        $user = Auth::user();
 
         $project = Project::where(function (Builder $builder) use ($request) {
             $status = $request->status;
@@ -124,47 +129,48 @@ class ProjectController extends Controller
 
             $participant = $request->participant;
             if ($participant) {
-                $builder->whereHas('mentoring.parcipant', function (Builder $builder) use ($participant) {
+                $builder->whereHas('mentoring.participant', function (Builder $builder) use ($participant) {
                     $builder->where(function (Builder $builder) use ($participant) {
-                        $builder->orWhere('username', 'like', $participant . '%');
+                        $builder->orWhere('name', 'like', $participant . '%');
                     });
                 });
             }
         });
 
-        if ($auth->role_id == 1) {
+        if ($user->role_id == 1) {
             $mentor = $request->mentor;
             if ($mentor) {
                 $project = $project->whereHas('mentoring.mentor', function (Builder $builder) use ($mentor) {
                     $builder->where(function (Builder $builder) use ($mentor) {
-                        $builder->orWhere('username', 'like', $mentor . '%');
+                        $builder->orWhere('name', 'like', $mentor . '%');
                     });
                 });
             }
         }
 
-        if ($auth->role_id == 2) {
-            $project = $project->whereHas('mentoring.mentor', function ($query) use ($auth) {
-                $query->where('id', '=', $auth->id);
+        if ($user->role_id == 2) {
+            $project = $project->whereHas('mentoring.mentor', function ($query) use ($user) {
+                $query->where('id', '=', $user->id);
             });
         }
 
-        if ($auth->role_id == 3) {
-            $project = $project->whereHas('mentoring.participant', function ($query) use ($auth) {
-                $query->where('id', '=', $auth->id);
+        if ($user->role_id == 3) {
+            $project = $project->whereHas('mentoring.participant', function ($query) use ($user) {
+                $query->where('id', '=', $user->id);
             });
             if ($project == null) {
-                return response()->json(['errors' => [
-                    'message' => [
-                        'Project not found'
+                return response()->json([
+                    'errors' => [
+                        'message' => [
+                            'project not found'
+                        ]
                     ]
-                ]], 404);
+                ], 404);
             }
-            // $noCollection = true;
         }
 
         try {
-            $project = $project->paginate($page);
+            $project = $project->orderBy('id', 'desc')->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -175,17 +181,23 @@ class ProjectController extends Controller
             ]));
         }
 
-        // if ($noCollection == true) {
-        //     return new ProjectResource($project);
-        // }
         return ProjectResource::collection($project);
     }
-    
+
     public function updateProject(ProjectUpdateRequest $request)
     {
         $request->validated();
-        $auth = Auth::user();
-        if ($auth->role_id != 2) {
+        if ($request->validated() == null) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'enter the data you want to update!'
+                    ]
+                ]
+            ], 400);
+        }
+        $user = Auth::user();
+        if ($user->role_id != 2) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -200,7 +212,7 @@ class ProjectController extends Controller
         $mentorId = $project->mentoring->mentor->id;
         $data = $request->all();
 
-        if ($auth->id == $mentorId) {
+        if ($user->id == $mentorId) {
             if (isset($request->project)) {
                 $project->project = $request->project;
             }
@@ -240,12 +252,22 @@ class ProjectController extends Controller
 
     public function deleteProject(Request $request)
     {
-        $auth = Auth::user();
+        $user = Auth::user();
         $project = Project::with(['mentoring.mentor'])
             ->find($request->id);
         $mentorId = $project->mentoring->mentor->id;
+        
+        if ($user->role_id != 2) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'non-mentor role'
+                    ]
+                ]
+            ], 400);
+        }
 
-        if ($auth->id == $mentorId) {
+        if ($user->id == $mentorId) {
             try {
                 $project->delete();
             } catch (QueryException $err) {

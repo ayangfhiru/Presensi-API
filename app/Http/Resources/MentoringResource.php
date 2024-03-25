@@ -16,8 +16,9 @@ class MentoringResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            'mentor' => $this->mentor->username,
-            'participant' => $this->participant->username
+            'mentor' => $this->mentor->name,
+            'participant' => $this->participant->name,
+            'division' => $this->participant->division->name
         ];
     }
 }

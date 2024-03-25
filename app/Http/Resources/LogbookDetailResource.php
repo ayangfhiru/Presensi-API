@@ -3,10 +3,10 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class TaskDetailResource extends JsonResource
+class LogbookDetailResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -23,8 +23,8 @@ class TaskDetailResource extends JsonResource
             'status' => $this->status,
             'project' => $this->project->project,
             'projectDate' => $this->project->date,
-            'participant' => $this->project->mentoring->participant->username,
-            'mentor' => $this->project->mentoring->mentor->username,
+            'participant' => $this->project->mentoring->participant->name,
+            'mentor' => $this->project->mentoring->mentor->name,
         ];
     }
 }

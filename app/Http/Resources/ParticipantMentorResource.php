@@ -16,7 +16,7 @@ class ParticipantMentorResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'username' => $this->participant->username
+            'name' => $this->participant->name
         ];
     }
 }

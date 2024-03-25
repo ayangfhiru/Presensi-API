@@ -6,14 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UserRegisterRequest extends FormRequest
+class LogbookAddRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        // return false; //default
         return true;
     }
 
@@ -25,11 +24,10 @@ class UserRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'max:100'],
-            'email' => ['required', 'max:100'],
-            'phone' => ['max:20'],
-            'role_id' => ['required', 'numeric'],
-            'division_id' => ['required', 'numeric']
+            'note' => ['required'],
+            'image' => ['file', 'mimes:png,jpg', 'max:2048'],
+            'date' => ['required'],
+            'project_id' => ['required', 'numeric']
         ];
     }
 

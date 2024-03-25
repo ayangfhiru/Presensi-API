@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Division;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +50,7 @@ class DivisionController extends Controller
         }
         return (new DivisionResource($division))->response()->setStatusCode(201);
     }
-    
+
     public function getDivision(Request $request)
     {
         $page = 10;
@@ -57,7 +58,7 @@ class DivisionController extends Controller
         $name = $request->name;
         if ($name) {
             $division = $division->where(function (Builder $builder) use ($name) {
-                $builder->orWhere('name', 'like', $name.'%');
+                $builder->orWhere('name', 'like', $name . '%');
             });
         }
         try {
@@ -74,10 +75,9 @@ class DivisionController extends Controller
         return DivisionResource::collection($division);
     }
 
-    public function deleteDivision(Request $requst)
+    public function deleteDivision(Request $request)
     {
         $user = Auth::user();
-        $division = Division::find($requst->id);
         if ($user->role_id != 1) {
             return response()->json([
                 'errors' => [
@@ -88,6 +88,7 @@ class DivisionController extends Controller
             ], 400);
         }
 
+        $division = Division::find($request->id);
         try {
             $division->delete();
         } catch (QueryException $err) {

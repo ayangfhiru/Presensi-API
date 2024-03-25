@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TaskDetailResource;
-use App\Models\Task;
+use App\Models\Logbook;
 use App\Models\Project;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use App\Http\Resources\TaskResource;
+use App\Http\Resources\LogbookResource;
+use App\Http\Resources\LogbookDetailResource;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\TaskAddRequest;
+use App\Http\Requests\LogbookAddRequest;
 use Illuminate\Database\QueryException;
-use App\Http\Requests\TaskUpdateRequest;
+use App\Http\Requests\LogbookUpdateRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class TaskController extends Controller
+
+class LogbookController extends Controller
 {
-    public function addTask(TaskAddRequest $request)
+    public function addLogbook(LogbookAddRequest $request)
     {
         $request->validated();
-        $auth = Auth::user();
-        if ($auth->role_id != 3) {
+        $user = Auth::user();
+        if ($user->role_id != 3) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -32,11 +33,11 @@ class TaskController extends Controller
 
         $project = Project::with(['mentoring.participant'])->find($request->project_id);
         $participant_id = $project->mentoring->participant->id;
-        if ($auth->id != $participant_id) {
+        if ($user->id != $participant_id) {
             return response()->json([
                 'errors' => [
                     'message' => [
-                        'failed add task'
+                        'failed add logbook'
                     ]
                 ]
             ], 400);
@@ -47,7 +48,7 @@ class TaskController extends Controller
         if ($request->file('image')) {
             $file = $request->file('image');
             $fileName = date('YmdHi') . $file->getClientOriginalName();
-            $image = $file->storeAs('task-images', $fileName);
+            $image = $file->storeAs('logbook-images', $fileName);
         }
 
         // convert date to milliseconds
@@ -57,9 +58,9 @@ class TaskController extends Controller
         $data = $request->all();
         $data['image'] = $image;
         $data['date'] = $milliseconds;
-        $task = new Task($data);
+        $logbook = new Logbook($data);
         try {
-            $task->save();
+            $logbook->save();
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -70,24 +71,24 @@ class TaskController extends Controller
             ], 400));
         }
 
-        return (new TaskResource($task))->response()->setStatusCode(201);
+        return(new LogbookResource($logbook))->response()->setStatusCode(201);
     }
-    
-    public function getTask(Request $request)
+
+    public function getLogbook(Request $request)
     {
         $page = 10;
-        $auth = Auth::user();
+        $user = Auth::user();
 
-        $task = Task::where(function (Builder $builder) use ($request) {
+        $logbook = Logbook::where(function (Builder $builder) use ($request) {
             $status = $request->status;
-            if (isset($status)) {
+            if (isset ($status)) {
                 $builder->where(function (Builder $builder) use ($status) {
                     $builder->orWhere('status', '=', $status);
                 });
             }
 
             $dateStart = $request->dateStart;
-            if ($dateStart) {
+            if (isset($dateStart)) {
                 $timeStamp = strtotime($dateStart);
                 $start = round($timeStamp * 1000);
                 $builder->where(function (Builder $builder) use ($start) {
@@ -96,7 +97,7 @@ class TaskController extends Controller
             }
 
             $dateEnd = $request->dateEnd;
-            if ($dateEnd) {
+            if (isset($dateEnd)) {
                 $timeStamp = strtotime($dateEnd);
                 $end = round($timeStamp * 1000);
                 $builder->where(function (Builder $builder) use ($end) {
@@ -106,39 +107,39 @@ class TaskController extends Controller
 
             $builder->whereHas('project.mentoring.participant', function (Builder $builder) use ($request) {
                 $participant = $request->participant;
-                if ($participant) {
+                if (isset($participant)) {
                     $builder->where(function (Builder $builder) use ($participant) {
-                        $builder->orWhere('username', 'like', $participant . '%');
+                        $builder->orWhere('name', 'like', $participant . '%');
                     });
                 }
             });
         });
 
-        if ($auth->role_id == 1) {
-            $task = $task->whereHas('project.mentoring.mentor', function (Builder $builder) use ($request) {
-                $mentor = $request->mentor;
-                if ($mentor) {
+        if ($user->role_id == 1) {
+            $mentor = $request->mentor;
+            if (isset($mentor)) {
+                $logbook = $logbook->whereHas('project.mentoring.mentor', function (Builder $builder) use ($mentor) {
                     $builder->where(function (Builder $builder) use ($mentor) {
-                        $builder->orWhere('username', 'like', $mentor.'%');
+                        $builder->orWhere('name', 'like', $mentor . '%');
                     });
-                }
+                });
+            }
+        }
+
+        if ($user->role_id == 2) {
+            $logbook = $logbook->whereHas('project.mentoring.mentor', function ($query) use ($user) {
+                $query->where('id', '=', $user->id);
             });
         }
 
-        if ($auth->role_id == 2) {
-            $task = $task->whereHas('project.mentoring.mentor', function ($query) use ($auth) {
-                $query->where('id', '=', $auth->id);
-            });
-        }
-
-        if ($auth->role_id == 3) {
-            $task = Task::whereHas('project.mentoring.participant', function ($query) use ($auth) {
-                $query->where('id', '=', $auth->id);
+        if ($user->role_id == 3) {
+            $logbook = Logbook::whereHas('project.mentoring.participant', function ($query) use ($user) {
+                $query->where('id', '=', $user->id);
             });
         }
 
         try {
-            $task = $task->paginate($page);
+            $logbook = $logbook->orderBy('id', 'desc')->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -149,34 +150,34 @@ class TaskController extends Controller
             ], 400));
         }
 
-        return TaskResource::collection($task);
+        return LogbookResource::collection($logbook);
     }
 
-    public function detailTask(Request $request)
+    public function detailLogbook(Request $request)
     {
-        $auth = Auth::user();
-        $task = Task::where('id', '=', $request->id);
+        $user = Auth::user();
+        $logbook = Logbook::where('id', '=', $request->id);
 
-        if ($auth->role_id == 2) {
-            $task = $task->where(function (Builder $builder) use ($auth) {
-                $builder->whereHas('project.mentoring.mentor', function ($query) use ($auth) {
-                    $query->where('id', '=', $auth->id);
+        if ($user->role_id == 2) {
+            $logbook = $logbook->where(function (Builder $builder) use ($user) {
+                $builder->whereHas('project.mentoring.mentor', function ($query) use ($user) {
+                    $query->where('id', '=', $user->id);
                 });
             });
         }
 
-        if ($auth->role_id == 3) {
+        if ($user->role_id == 3) {
             return response()->json([
                 'errors' => [
                     'message' => [
                         'non-admin or mentor role'
                     ]
                 ]
-            ]);
+            ], 400);
         }
 
         try {
-            $task = $task->first();
+            $logbook = $logbook->first();
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -187,23 +188,34 @@ class TaskController extends Controller
             ], 400));
         }
 
-        if ($task == null) {
-            return response()->json(['errors' => [
-                'message' => [
-                    'id task wrong'
+        if ($logbook == null) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'id logbook wrong'
+                    ]
                 ]
-            ]]);
+            ], 400);
         }
 
-        return new TaskDetailResource($task);
+        return new LogbookDetailResource($logbook);
     }
 
-    public function updateTask(TaskUpdateRequest $request)
+    public function updateLogbook(LogbookUpdateRequest $request)
     {
         $request->validated();
-        $auth = Auth::user();
+        if ($request->validated() == null) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'enter the data you want to update!'
+                    ]
+                ]
+            ], 400);
+        }
 
-        if ($auth->role_id == 1) {
+        $user = Auth::user();
+        if ($user->role_id == 1) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -213,30 +225,32 @@ class TaskController extends Controller
             ], 400);
         }
 
-        $task = Task::with(['project.mentoring.mentor'])
+        $logbook = Logbook::with(['project.mentoring.mentor'])
             ->where('id', '=', $request->id)
             ->first();
-        if (!$task) {
-            return response()->json(['errors' => [
-                'message' => [
-                    'data null'
+        if (!$logbook) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'data null'
+                    ]
                 ]
-            ]], 400);
+            ], 400);
         }
 
-        $mentoring = $task->project->mentoring;
+        $mentoring = $logbook->project->mentoring;
         $mentorId = $mentoring->mentor->id;
         $participantId = $mentoring->participant->id;
 
-        if ($auth->role_id == 2) {
-            if ($mentorId == $auth->id) {
+        if ($user->role_id == 2) {
+            if ($mentorId == $user->id) {
                 if (isset($request->status)) {
-                    $task->status = $request->status;
+                    $logbook->status = $request->status;
                 }
                 if ($request->date) {
                     $timeStamp = strtotime($request->date);
                     $milliseconds = round($timeStamp * 1000);
-                    $task->date = $milliseconds;
+                    $logbook->date = $milliseconds;
                 }
             } else {
                 return response()->json([
@@ -249,16 +263,16 @@ class TaskController extends Controller
             }
         }
 
-        if($auth->role_id == 3) {
-            if ($participantId == $auth->id && $task->status == 0) {
+        if ($user->role_id == 3) {
+            if ($participantId == $user->id && $logbook->status == 0) {
                 if (isset($request->note)) {
-                    $task->note = $request->note;
+                    $logbook->note = $request->note;
                 }
                 if ($request->file('image')) {
                     $file = $request->file('image');
                     $fileName = date('YmdHi') . $file->getClientOriginalName();
-                    $image = $file->storeAs('task-images', $fileName);
-                    $task->image = $image;
+                    $image = $file->storeAs('logbook-images', $fileName);
+                    $logbook->image = $image;
                 }
             } else {
                 return response()->json([
@@ -272,7 +286,7 @@ class TaskController extends Controller
         }
 
         try {
-            $task->save();
+            $logbook->save();
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -283,13 +297,13 @@ class TaskController extends Controller
             ], 400));
         }
 
-        return new TaskResource($task);
+        return new LogbookDetailResource($logbook);
     }
 
-    public function deleteTask(Request $request)
+    public function deleteLogbook(Request $request)
     {
-        $auth = Auth::user();
-        if ($auth->role_id != 2) {
+        $user = Auth::user();
+        if ($user->role_id != 2) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -299,13 +313,13 @@ class TaskController extends Controller
             ], 400);
         }
 
-        $task = Task::with(['project.mentoring.mentor'])
+        $logbook = Logbook::with(['project.mentoring.mentor'])
             ->find($request->id);
-        $mentorId = $task->project->mentoring->mentor->id;
+        $mentorId = $logbook->project->mentoring->mentor->id;
 
-        if ($auth->id == $mentorId) {
+        if ($user->id == $mentorId) {
             try {
-                $task->delete();
+                $logbook->delete();
             } catch (QueryException $err) {
                 throw new HttpResponseException(response([
                     'errors' => [

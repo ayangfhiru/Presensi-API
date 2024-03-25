@@ -10,7 +10,7 @@
         }
     ],
     "paths": {
-        "api/task": {
+        "api/logbook": {
             "post": {
                 "_description": "Create new logbook",
                 "parameters": [
@@ -159,7 +159,7 @@
                 }
             }
         },
-        "api/task/{id}": {
+        "api/logbook/{id}": {
             "get": {
                 "description": "Get detail logbook",
                 "parameters": [
