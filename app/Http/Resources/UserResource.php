@@ -16,9 +16,10 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'username' => $this->username,
+            'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
+            'status' => $this->status ? true : false,
             'role' => $this->role->name,
             'division' => $this->whenNotNull($this->division ? $this->division->name : null),
             'token' => $this->whenNotNull($this->token)

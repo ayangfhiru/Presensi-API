@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class TaskAddRequest extends FormRequest
+class PresenceAddRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +24,9 @@ class TaskAddRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'note' => ['required'],
-            'image' => ['file', 'mimes:png,jpg', 'max:2048'],
             'date' => ['required'],
-            'project_id' => ['required', 'numeric']
+            'entry_time' => ['required'],
+            'exit_time' => ['required']
         ];
     }
 

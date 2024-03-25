@@ -5,15 +5,15 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\ValidationException;
 
-class UserRegisterRequest extends FormRequest
+class AdminUserUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        // return false; //default
         return true;
     }
 
@@ -25,11 +25,10 @@ class UserRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'max:100'],
-            'email' => ['required', 'max:100'],
-            'phone' => ['max:20'],
-            'role_id' => ['required', 'numeric'],
-            'division_id' => ['required', 'numeric']
+            'status' => ['nullable', 'boolean'],
+            'password' => ['nullable', 'max:250'],
+            'role_id' => ['nullable', 'numeric'],
+            'division_id' => ['nullable', 'numeric']
         ];
     }
 

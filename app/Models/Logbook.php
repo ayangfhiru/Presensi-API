@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Task extends Model
+class Logbook extends Model
 {
-    protected $table = "tasks";
+    protected $table = "logbooks";
     protected $primaryKey = "id";
     protected $keytype = "int";
     public $timestamps = true;

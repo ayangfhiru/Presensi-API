@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminUserUpdateRequest;
+use App\Http\Resources\NullResource;
 use App\Models\Role;
 use App\Models\User;
 use App\Mail\LoginEmail;
@@ -19,25 +21,15 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UserController extends Controller
 {
-    public function register(UserRegisterRequest $request)
+    public function userRegister(UserRegisterRequest $request)
     {
         $request->validated();
-        $auth = Auth::user();
-        if ($auth->role_id != 1) {
+        $user = Auth::user();
+        if ($user->role_id != 1) {
             throw new HttpResponseException(response([
                 'errors' => [
                     'message' => [
                         'non-admin role'
-                    ]
-                ]
-            ], 400));
-        }
-
-        if (User::where('username', $request->username)->count() == 1) {
-            throw new HttpResponseException(response([
-                'errors' => [
-                    'username' => [
-                        'username alredy registered'
                     ]
                 ]
             ], 400));
@@ -63,11 +55,11 @@ class UserController extends Controller
             ], 400));
         }
 
-        $user = new User($request->all());
+        $newUser = new User($request->all());
         $password = Str::random(6);
-        $user->password = Hash::make($password);
+        $newUser->password = Hash::make($password);
         try {
-            $user->save();
+            $newUser->save();
             $role = Role::find($request->role_id)->name;
             $division = $request->division_id ? Division::find($request->division_id)->name : null;
         } catch (QueryException $err) {
@@ -90,29 +82,45 @@ class UserController extends Controller
 
         Mail::to('fhiruayang@gmail.com')->send(new LoginEmail($mailData));
 
-        return (new UserResource($user))->response()->setStatusCode(201);
+        return (new UserResource($newUser))->response()->setStatusCode(201);
     }
 
     public function getUser(Request $request)
     {
-        $auth = Auth::user();
-        $page = 10;
-        $user = User::where(function (Builder $builder) use ($request) {
-            $username = $request->username;
-            if ($username) {
-                $builder->where(function (Builder $builder) use ($username) {
-                    $builder->orWhere('username', 'like', $username . '%');
+        $user = Auth::user();
+        $page = 25;
+        $getUser = User::where(function (Builder $builder) use ($request) {
+            $name = $request->name;
+            if ($name) {
+                $builder->where(function (Builder $builder) use ($name) {
+                    $builder->orWhere('name', 'like', $name . '%');
+                });
+            }
+
+            $division = $request->division;
+            if ($division) {
+                $builder->whereHas('division', function (Builder $builder) use ($division) {
+                    $builder->where('id', '=', $division);
                 });
             }
         });
 
-        if ($auth->role_id == 2) {
-            $user = $user->whereHas('participant', function (Builder $builder) use ($auth) {
-                $builder->where('mentor_id', '=', $auth->id);
+        if ($user->role_id == 1) {
+            $role = $request->role;
+            if ($role) {
+                $getUser = $getUser->whereHas('role', function (Builder $builder) use ($role) {
+                    $builder->where('id', '=', $role);
+                });
+            }
+        }
+
+        if ($user->role_id == 2) {
+            $getUser = $getUser->whereHas('participant', function (Builder $builder) use ($user) {
+                $builder->where('mentor_id', '=', $user->id);
             });
         }
 
-        if ($auth->role_id == 3) {
+        if ($user->role_id == 3) {
             throw new HttpResponseException(response([
                 'errors' => [
                     'message' => [
@@ -123,7 +131,7 @@ class UserController extends Controller
         }
 
         try {
-            $user = $user->paginate($page);
+            $getUser = $getUser->paginate($page);
         } catch (QueryException $err) {
             throw new HttpResponseException(response([
                 'errors' => [
@@ -133,14 +141,79 @@ class UserController extends Controller
                 ]
             ], 400));
         }
-        return UserResource::collection($user);
+        return UserResource::collection($getUser);
+    }
+
+    public function updateUser(AdminUserUpdateRequest $request)
+    {
+        $request->validated();
+        $user = Auth::user();
+        if ($user->role_id !== 1) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'non-admin or mentor role'
+                    ]
+                ]
+            ], 400);
+        }
+
+        $updateUser = User::find($request->id);
+
+        if (isset ($request->status)) {
+            $updateUser->status = $request->status;
+        }
+        if (isset ($request->role)) {
+            $role = Role::find($request->role);
+            if ($role == null) {
+                return response()->json([
+                    'errors' => [
+                        'role' => [
+                            'role not found'
+                        ]
+                    ]
+                ], 400);
+            }
+            $updateUser->role_id = $request->role;
+        }
+        if (isset ($request->division)) {
+            $division = Division::find($request->division);
+            if ($division == null) {
+                return response()->json([
+                    'errors' => [
+                        'division' => [
+                            'division not found'
+                        ]
+                    ]
+                ], 400);
+            }
+            $updateUser->division_id = $request->division;
+        }
+        if (isset ($request->password)) {
+            $newPassword = $request->password;
+            $updateUser->password = Hash::make($newPassword);
+        }
+
+        try {
+            $updateUser->save();
+        } catch (QueryException $err) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        $err->errorInfo[2]
+                    ]
+                ]
+            ], 400);
+        }
+
+        return new UserResource($updateUser);
     }
 
     public function deleteUser(Request $request)
     {
-        $auth = Auth::user();
-        $user = User::find($request->id);
-        if ($auth->role_id != 1) {
+        $user = Auth::user();
+        $deleteUser = User::find($request->id);
+        if ($user->role_id != 1) {
             throw new HttpResponseException(response([
                 'errors' => [
                     'role' => [
@@ -150,7 +223,7 @@ class UserController extends Controller
             ], 400));
         }
 
-        if ($user == null) {
+        if ($deleteUser == null) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -160,7 +233,7 @@ class UserController extends Controller
             ], 400);
         }
 
-        if ($user->role_id == 1) {
+        if ($deleteUser->role_id == 1) {
             $admin = User::where('role_id', '=', 1)->get()->count();
             if ($admin <= 1) {
                 return response()->json([
@@ -174,7 +247,7 @@ class UserController extends Controller
         }
 
         try {
-            $user->delete();
+            $deleteUser->delete();
         } catch (QueryException $err) {
             return response()->json([
                 'errors' => [

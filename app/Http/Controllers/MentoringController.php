@@ -18,9 +18,9 @@ class MentoringController extends Controller
     public function addMentoring(MentoringAddRequest $request)
     {
         $request->validated();
-        $auth = Auth::user();
+        $user = Auth::user();
 
-        if ($auth->role_id != 1) {
+        if ($user->role_id != 1) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -71,34 +71,34 @@ class MentoringController extends Controller
     public function getMentoring(Request $request)
     {
         $page = 10;
-        $auth = Auth::user();
+        $user = Auth::user();
         $mentoring = Mentoring::where(function (Builder $builder) use ($request) {
             $participant = $request->participant;
             if ($participant) {
                 $builder->whereHas('participant', function (Builder $builder) use ($participant) {
                     $builder->where(function (Builder $builder) use ($participant) {
-                        $builder->orWhere('username', 'like', $participant . '%');
+                        $builder->orWhere('name', 'like', $participant . '%');
                     });
                 });
             }
         });
 
-        if ($auth->role_id == 1) {
+        if ($user->role_id == 1) {
             $mentor = $request->mentor;
             if ($mentor) {
                 $mentoring = $mentoring->whereHas('mentor', function (Builder $builder) use ($mentor) {
                     $builder->where(function (Builder $builder) use ($mentor) {
-                        $builder->orWhere('username', 'like', $mentor . '%');
+                        $builder->orWhere('name', 'like', $mentor . '%');
                     });
                 });
             }
         }
 
-        if ($auth->role_id == 2) {
-            $mentoring = $mentoring->where('mentor_id', '=', $auth->id);
+        if ($user->role_id == 2) {
+            $mentoring = $mentoring->where('mentor_id', '=', $user->id);
         }
 
-        if ($auth->role_id == 3) {
+        if ($user->role_id == 3) {
             return response()->json([
                 'errors' => [
                     'message' => [
@@ -126,9 +126,18 @@ class MentoringController extends Controller
     public function updateMentoring(MentoringUpdateRequest $request)
     {
         $request->validated();
-        $auth = Auth::user();
+        if ($request->validated() == null) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'enter the data you want to update!'
+                    ]
+                ]
+            ], 400);
+        }
+        $user = Auth::user();
         $mentoring = Mentoring::find($request->id);
-        if ($auth->role_id != 1) {
+        if ($user->role_id != 1) {
             return response()->json([
                 'errors' => [
                     'role' => [
@@ -142,12 +151,30 @@ class MentoringController extends Controller
         $mentor = User::find($mentoring->mentor_id);
         $participant = user::find($mentoring->participant_id);
 
-        if (isset($request->mentor_id)) {
+        if (isset ($request->mentor_id)) {
             $mentor = User::find($request->mentor_id);
+            if ($mentor->role_id !== 2) {
+                return response()->json([
+                    'errors' => [
+                        'message' => [
+                            'data entered invalid'
+                        ]
+                    ]
+                ], 400);
+            }
             $mentoring->mentor_id = $request->mentor_id;
         }
-        if (isset($request->participant_id)) {
+        if (isset ($request->participant_id)) {
             $participant = User::find($request->participant_id);
+            if ($participant->role_id !== 3) {
+                return response()->json([
+                    'errors' => [
+                        'message' => [
+                            'data entered invalid'
+                        ]
+                    ]
+                ], 400);
+            }
             $mentoring->participant_id = $request->participant_id;
         }
 
@@ -178,8 +205,8 @@ class MentoringController extends Controller
 
     public function deleteMentoring(Request $request)
     {
-        $auth = Auth::user();
-        if ($auth->role_id != 1) {
+        $user = Auth::user();
+        if ($user->role_id != 1) {
             return response()->json([
                 'errors' => [
                     'role' => [

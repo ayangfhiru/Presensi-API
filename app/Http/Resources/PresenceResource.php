@@ -20,8 +20,8 @@ class PresenceResource extends JsonResource
             'entry_time' => $this->entry_time,
             'exit_time' => $this->whenNotNull($this->exit_time),
             'status' => $this->status,
-            'participant' => $this->user->username,
-            'mentor' => $this->mentoring->mentor->username
+            'participant' => $this->user->name,
+            'mentor' => $this->mentoring->mentor->name
         ];
     }
 }

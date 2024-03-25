@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\TaskController;
+use App\Http\Controllers\LogbookController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DivisionController;
@@ -26,10 +26,12 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('presence', [PresenceController::class, 'addPresence']);
     Route::get('presence', [PresenceController::class, 'getPresence']);
-    Route::get('presence/{id}', [PresenceController::class, 'getDetailPresence']);
+    Route::put('presence/{id}', [PresenceController::class, 'updatePresence']);
+    Route::delete('presence/{id}', [PresenceController::class, 'deletePresence']);
     
-    Route::post('user/register', [UserController::class, 'register']);
+    Route::post('user/register', [UserController::class, 'userRegister']);
     Route::get('users/', [UserController::class, 'getUser']);
+    Route::put('users/{id}', [UserController::class, 'updateUser']);
     Route::delete('users/{id}', [UserController::class, 'deleteUser']);
 
     Route::post('mentoring', [MentoringController::class, 'addMentoring']);
@@ -43,11 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('project/{id}', [ProjectController::class, 'updateProject']);
     Route::delete('project/{id}', [ProjectController::class, 'deleteProject']);
 
-    Route::post('task', [TaskController::class, 'addTask']);
-    Route::get('task', [TaskController::class, 'getTask']);
-    Route::get('task/{id}', [TaskController::class, 'detailTask']);
-    Route::put('task/{id}', [TaskController::class, 'updateTask']);
-    Route::delete('task/{id}', [TaskController::class, 'deleteTask']);
+    Route::post('logbook', [LogbookController::class, 'addLogbook']);
+    Route::get('logbook', [LogbookController::class, 'getLogbook']);
+    Route::get('logbook/{id}', [LogbookController::class, 'detailLogbook']);
+    Route::put('logbook/{id}', [LogbookController::class, 'updateLogbook']);
+    Route::delete('logbook/{id}', [LogbookController::class, 'deleteLogbook']);
     
     Route::get('account/detail', [AuthController::class, 'detailAccount']);
     Route::put('account/update', [AuthController::class, 'updateAccount']);

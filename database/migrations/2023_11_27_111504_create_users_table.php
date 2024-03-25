@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('username', 100)->nullable(false)->unique('user_username_unique');
             $table->string('email', 100)->nullable(false)->unique('user_email_unique');
             $table->string('phone', 20)->nullable()->unique('user_phone_unique');
+            $table->boolean('status')->nullable(false)->default(true);
             $table->string('password')->nullable(false);
             $table->unsignedBigInteger('role_id')->nullable(false);
             $table->unsignedBigInteger('division_id')->nullable();

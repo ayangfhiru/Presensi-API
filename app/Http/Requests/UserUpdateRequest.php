@@ -13,8 +13,8 @@ class UserUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // return false;
-        return $this->user() != null;
+        return true;
+        // return $this->user() != null;
     }
 
     /**
@@ -25,12 +25,10 @@ class UserUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => ['nullable', 'max:100'],
+            'name' => ['nullable', 'max:100'],
             'email' => ['nullable', 'max:100'],
             'phone' => ['nullable', 'max:20'],
             'password' => ['nullable', 'max:250'],
-            'role_id' => ['nullable', 'numeric'],
-            'division_id' => ['nullable', 'numeric']
         ];
     }
 
