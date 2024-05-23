@@ -184,7 +184,7 @@ class PresenceController extends Controller
 
         if ($user->role_id == 1) {
             $mentor = $request->mentor;
-            if (isset ($mentor)) {
+            if (isset($mentor)) {
                 $presence = $presence->whereHas('mentoring.mentor', function (Builder $builder) use ($mentor) {
                     $builder->where(function (Builder $builder) use ($mentor) {
                         $builder->orWhere('name', 'like', $mentor . '%');
@@ -261,14 +261,14 @@ class PresenceController extends Controller
             ], 400);
         }
 
-        if (isset ($request->date)) {
+        if (isset($request->date)) {
             $presence->date = $this->dateToEpoch($request->date);
         }
-        if (isset ($request->entry_time)) {
+        if (isset($request->entry_time)) {
             $presence->entry_time = $this->dateToEpoch($request->entry_time);
             $presence->status = $this->setStatus($request->entry_time);
         }
-        if (isset ($request->exit_time)) {
+        if (isset($request->exit_time)) {
             $presence->exit_time = $this->dateToEpoch($request->exit_time);
         }
 
@@ -300,19 +300,16 @@ class PresenceController extends Controller
         }
 
         $presence = Presence::find($request->id);
-
-        if ($user->role_id == 1 || $user->role_id == 2) {
-            try {
-                $presence->delete();
-            } catch (QueryException $err) {
-                throw new HttpResponseException(response([
-                    'errors' => [
-                        'message' => [
-                            $err->errorInfo[2]
-                        ]
+        try {
+            $presence->delete();
+        } catch (QueryException $err) {
+            throw new HttpResponseException(response([
+                'errors' => [
+                    'message' => [
+                        $err->errorInfo[2]
                     ]
-                ], 400));
-            }
+                ]
+            ], 400));
         }
         return response()->json([
             'data' => true

@@ -24,9 +24,9 @@ class PresenceUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['nullable'],
-            'entry_time' => ['nullable'],
-            'exit_time' => ['nullable']
+            'date' => ['nullable', 'date'],
+            'entry_time' => ['nullable', 'date'],
+            'exit_time' => ['nullable', 'date']
         ];
     }
     protected function failedValidation(Validator $validator)

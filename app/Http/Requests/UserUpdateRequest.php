@@ -26,9 +26,9 @@ class UserUpdateRequest extends FormRequest
     {
         return [
             'name' => ['nullable', 'max:100'],
-            'email' => ['nullable', 'max:100'],
-            'phone' => ['nullable', 'max:20'],
-            'password' => ['nullable', 'max:250'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'password' => ['nullable', 'string', 'max:250'],
         ];
     }
 

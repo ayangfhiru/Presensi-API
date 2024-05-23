@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class LogbookUpdateRequest extends FormRequest
 {
@@ -22,8 +24,18 @@ class LogbookUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'note' => ['string'],
-            'image' => ['file', 'mimes:png,jpg', 'max:2048']
+            'note' => ['nullable', 'string'],
+            'image' => ['nullable', 'file', 'mimes:png,jpg', 'max:2048'],
+            'date' => ['nullable', 'date'],
+            'status' => ['nullable', 'boolean'],
+            'project_id' => ['nullable', 'numeric']
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response([
+            "errors" => $validator->getMessageBag()
+        ], 400));
     }
 }

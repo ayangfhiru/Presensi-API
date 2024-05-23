@@ -37,15 +37,16 @@ class AuthController extends Controller
     public function updateAccount(UserUpdateRequest $request)
     {
         $request->validated();
-        if ($request->validated() == null) {
-            return response()->json([
-                'errors' => [
-                    'message' => [
-                        'enter the data you want to update!'
-                    ]
-                ]
-            ], 400);
-        }
+        // if ($request->validated() == null) {
+        //     return response()->json([
+        //         'errors' => [
+        //             'message' => [
+        //                 'enter the data you want to update!'
+        //             ]
+        //         ]
+        //     ], 400);
+        // }
+        return response()->json([$request->name]);
         $user = Auth::user();
 
         if (isset($request->name)) {

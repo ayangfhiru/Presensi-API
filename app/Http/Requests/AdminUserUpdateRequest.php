@@ -26,7 +26,7 @@ class AdminUserUpdateRequest extends FormRequest
     {
         return [
             'status' => ['nullable', 'boolean'],
-            'password' => ['nullable', 'max:250'],
+            'password' => ['nullable', 'min:6', 'max:250'],
             'role_id' => ['nullable', 'numeric'],
             'division_id' => ['nullable', 'numeric']
         ];
