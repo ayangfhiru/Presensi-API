@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ProjectUpdateRequest extends FormRequest
 {
@@ -22,8 +24,16 @@ class ProjectUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project' => ['nullable'],
-            'status' => ['nullable']
+            'project' => ['nullable', 'string'],
+            'status' => ['nullable', 'boolean'],
+            'date' => ['nullable', 'date']
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response([
+            "errors" => $validator->getMessageBag()
+        ], 400));
     }
 }

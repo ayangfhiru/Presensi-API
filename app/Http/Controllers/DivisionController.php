@@ -89,9 +89,28 @@ class DivisionController extends Controller
         }
 
         $division = Division::find($request->id);
+        if ($division == null) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'data division is null'
+                    ]
+                ]
+            ], 400);
+        }
+        
         try {
             $division->delete();
         } catch (QueryException $err) {
+            if ($err->getCode() === '23000') {
+                return response()->json([
+                    'errors' => [
+                        'message' => [
+                            'cannot be deleted, because the data is connected by relations'
+                        ]
+                    ]
+                ], 400);
+            }
             throw new HttpResponseException(response([
                 'errors' => [
                     'message' => [

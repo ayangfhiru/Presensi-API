@@ -71,7 +71,7 @@ class LogbookController extends Controller
             ], 400));
         }
 
-        return(new LogbookResource($logbook))->response()->setStatusCode(201);
+        return (new LogbookResource($logbook))->response()->setStatusCode(201);
     }
 
     public function getLogbook(Request $request)
@@ -88,7 +88,7 @@ class LogbookController extends Controller
             }
 
             $dateStart = $request->dateStart;
-            if (isset($dateStart)) {
+            if (isset ($dateStart)) {
                 $timeStamp = strtotime($dateStart);
                 $start = round($timeStamp * 1000);
                 $builder->where(function (Builder $builder) use ($start) {
@@ -97,7 +97,7 @@ class LogbookController extends Controller
             }
 
             $dateEnd = $request->dateEnd;
-            if (isset($dateEnd)) {
+            if (isset ($dateEnd)) {
                 $timeStamp = strtotime($dateEnd);
                 $end = round($timeStamp * 1000);
                 $builder->where(function (Builder $builder) use ($end) {
@@ -107,7 +107,7 @@ class LogbookController extends Controller
 
             $builder->whereHas('project.mentoring.participant', function (Builder $builder) use ($request) {
                 $participant = $request->participant;
-                if (isset($participant)) {
+                if (isset ($participant)) {
                     $builder->where(function (Builder $builder) use ($participant) {
                         $builder->orWhere('name', 'like', $participant . '%');
                     });
@@ -204,15 +204,15 @@ class LogbookController extends Controller
     public function updateLogbook(LogbookUpdateRequest $request)
     {
         $request->validated();
-        if ($request->validated() == null) {
-            return response()->json([
-                'errors' => [
-                    'message' => [
-                        'enter the data you want to update!'
-                    ]
-                ]
-            ], 400);
-        }
+        // if ($request->validated() == null) {
+        //     return response()->json([
+        //         'errors' => [
+        //             'message' => [
+        //                 'enter the data you want to update!'
+        //             ]
+        //         ]
+        //     ], 400);
+        // }
 
         $user = Auth::user();
         if ($user->role_id == 1) {
@@ -232,7 +232,7 @@ class LogbookController extends Controller
             return response()->json([
                 'errors' => [
                     'message' => [
-                        'data null'
+                        'data from id not found'
                     ]
                 ]
             ], 400);
@@ -247,16 +247,19 @@ class LogbookController extends Controller
                 if (isset($request->status)) {
                     $logbook->status = $request->status;
                 }
-                if ($request->date) {
+                if (isset($request->date)) {
                     $timeStamp = strtotime($request->date);
                     $milliseconds = round($timeStamp * 1000);
                     $logbook->date = $milliseconds;
+                }
+                if (isset($request->project_id)) {
+                    $logbook->project_id = $request->project_id;
                 }
             } else {
                 return response()->json([
                     'errors' => [
                         'message' => [
-                            'mentor failed'
+                            'id entered is not the participant you are mentoring'
                         ]
                     ]
                 ], 400);
@@ -303,40 +306,44 @@ class LogbookController extends Controller
     public function deleteLogbook(Request $request)
     {
         $user = Auth::user();
-        if ($user->role_id != 2) {
+        if ($user->role_id == 3) {
             return response()->json([
                 'errors' => [
                     'message' => [
-                        'non-mentor role'
+                        'non-admin or mentor role'
                     ]
                 ]
             ], 400);
         }
 
-        $logbook = Logbook::with(['project.mentoring.mentor'])
-            ->find($request->id);
-        $mentorId = $logbook->project->mentoring->mentor->id;
-
-        if ($user->id == $mentorId) {
-            try {
-                $logbook->delete();
-            } catch (QueryException $err) {
-                throw new HttpResponseException(response([
+        $logbook = new Logbook();
+        if ($user->role_id == 1) {
+            $logbook->find($request->id);
+        } else {
+            $logbook->with(['project.mentoring.mentor'])
+                ->find($request->id);
+            $mentorId = $logbook->project->mentoring->mentor->id;
+            if ($user->id != $mentorId) {
+                return response()->json([
                     'errors' => [
                         'message' => [
-                            $err->errorInfo[2]
+                            'id logbook failed'
                         ]
                     ]
-                ], 400));
+                ], 400);
             }
-        } else {
-            return response()->json([
+        }
+
+        try {
+            $logbook->delete();
+        } catch (QueryException $err) {
+            throw new HttpResponseException(response([
                 'errors' => [
                     'message' => [
-                        'failed to delete'
+                        $err->errorInfo[2]
                     ]
                 ]
-            ], 400);
+            ], 400));
         }
 
         return response()->json([
