@@ -28,7 +28,7 @@ class LogbookController extends Controller
                         'non-participant role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $project = Project::with(['mentoring.participant'])->find($request->project_id);
@@ -40,7 +40,7 @@ class LogbookController extends Controller
                         'failed add logbook'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         // upload image
@@ -68,7 +68,7 @@ class LogbookController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return (new LogbookResource($logbook))->response()->setStatusCode(201);
@@ -147,7 +147,7 @@ class LogbookController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return LogbookResource::collection($logbook);
@@ -173,7 +173,7 @@ class LogbookController extends Controller
                         'non-admin or mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         try {
@@ -185,7 +185,7 @@ class LogbookController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         if ($logbook == null) {
@@ -195,7 +195,7 @@ class LogbookController extends Controller
                         'id logbook wrong'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         return new LogbookDetailResource($logbook);
@@ -204,15 +204,6 @@ class LogbookController extends Controller
     public function updateLogbook(LogbookUpdateRequest $request)
     {
         $request->validated();
-        // if ($request->validated() == null) {
-        //     return response()->json([
-        //         'errors' => [
-        //             'message' => [
-        //                 'enter the data you want to update!'
-        //             ]
-        //         ]
-        //     ], 400);
-        // }
 
         $user = Auth::user();
         if ($user->role_id == 1) {
@@ -222,7 +213,7 @@ class LogbookController extends Controller
                         'non-mentor or participant role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $logbook = Logbook::with(['project.mentoring.mentor'])
@@ -235,7 +226,7 @@ class LogbookController extends Controller
                         'data from id not found'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $mentoring = $logbook->project->mentoring;
@@ -262,7 +253,7 @@ class LogbookController extends Controller
                             'id entered is not the participant you are mentoring'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
         }
 
@@ -284,7 +275,7 @@ class LogbookController extends Controller
                             'can not update'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
         }
 
@@ -297,7 +288,7 @@ class LogbookController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return new LogbookDetailResource($logbook);
@@ -313,7 +304,7 @@ class LogbookController extends Controller
                         'non-admin or mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $logbook = new Logbook();
@@ -330,7 +321,7 @@ class LogbookController extends Controller
                             'id logbook failed'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
         }
 
@@ -343,7 +334,7 @@ class LogbookController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return response()->json([

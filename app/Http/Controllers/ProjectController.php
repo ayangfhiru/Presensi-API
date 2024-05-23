@@ -26,7 +26,7 @@ class ProjectController extends Controller
                         'non-mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $mentoring = Mentoring::with('participant:id,username')->where('mentorings.mentor_id', '=', $user->id);
@@ -43,7 +43,7 @@ class ProjectController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return ParticipantMentorResource::collection($mentoring);
     }
@@ -59,7 +59,7 @@ class ProjectController extends Controller
                         'non-mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $mentoring = Mentoring::where('id', '=', $request->mentoring_id)->first();
@@ -90,7 +90,7 @@ class ProjectController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return (new ProjectResource($project))->response()->setStatusCode(201);
@@ -103,7 +103,7 @@ class ProjectController extends Controller
 
         $project = Project::where(function (Builder $builder) use ($request) {
             $status = $request->status;
-            if (isset($status)) {
+            if (isset ($status)) {
                 $builder->where(function (Builder $builder) use ($status) {
                     $builder->orWhere('status', '=', $status);
                 });
@@ -194,7 +194,7 @@ class ProjectController extends Controller
                         'enter the data you want to update!'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
         $user = Auth::user();
         if ($user->role_id != 2) {
@@ -204,7 +204,7 @@ class ProjectController extends Controller
                         'non-mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $project = Project::with(['mentoring.mentor'])
@@ -232,7 +232,7 @@ class ProjectController extends Controller
                         'failed to update'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         try {
@@ -244,7 +244,7 @@ class ProjectController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return new ProjectResource($project);
@@ -256,7 +256,7 @@ class ProjectController extends Controller
         $project = Project::with(['mentoring.mentor'])
             ->find($request->id);
         $mentorId = $project->mentoring->mentor->id;
-        
+
         if ($user->role_id != 2) {
             return response()->json([
                 'errors' => [
@@ -264,7 +264,7 @@ class ProjectController extends Controller
                         'non-mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         if ($user->id == $mentorId) {
@@ -277,7 +277,7 @@ class ProjectController extends Controller
                             $err->errorInfo[2]
                         ]
                     ]
-                ], 400));
+                ], 404));
             }
         } else {
             return response()->json([
@@ -286,7 +286,7 @@ class ProjectController extends Controller
                         'failed to delete'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         return response()->json([

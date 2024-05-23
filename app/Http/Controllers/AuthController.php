@@ -37,16 +37,15 @@ class AuthController extends Controller
     public function updateAccount(UserUpdateRequest $request)
     {
         $request->validated();
-        // if ($request->validated() == null) {
-        //     return response()->json([
-        //         'errors' => [
-        //             'message' => [
-        //                 'enter the data you want to update!'
-        //             ]
-        //         ]
-        //     ], 400);
-        // }
-        return response()->json([$request->name]);
+        if ($request->validated() == null) {
+            return response()->json([
+                'errors' => [
+                    'message' => [
+                        'enter the data you want to update!'
+                    ]
+                ]
+            ], 404);
+        }
         $user = Auth::user();
 
         if (isset($request->name)) {
@@ -75,7 +74,7 @@ class AuthController extends Controller
         }
         return new AuthResource($user);
     }
-    
+
     public function detailAccount(Request $request): AuthResource
     {
         try {
@@ -87,7 +86,7 @@ class AuthController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return new AuthResource($user);
     }

@@ -27,7 +27,7 @@ class MentoringController extends Controller
                         'non-admin role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $mentor = User::find($request->mentor_id);
@@ -39,7 +39,7 @@ class MentoringController extends Controller
                         'data entered invalid'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         if ($mentor->division_id != $participant->division_id) {
@@ -49,7 +49,7 @@ class MentoringController extends Controller
                         'division data is not the same'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $mentoring = new Mentoring($request->all());
@@ -62,7 +62,7 @@ class MentoringController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return (new MentoringResource($mentoring))->response()->setStatusCode(201);
@@ -105,7 +105,7 @@ class MentoringController extends Controller
                         'non-admin or mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         try {
@@ -117,7 +117,7 @@ class MentoringController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return MentoringResource::collection($mentoring);
@@ -133,7 +133,7 @@ class MentoringController extends Controller
                         'enter the data you want to update!'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
         $user = Auth::user();
         $mentoring = Mentoring::find($request->id);
@@ -144,14 +144,14 @@ class MentoringController extends Controller
                         'non-admin role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
 
         $mentor = User::find($mentoring->mentor_id);
         $participant = user::find($mentoring->participant_id);
 
-        if (isset ($request->mentor_id)) {
+        if (isset($request->mentor_id)) {
             $mentor = User::find($request->mentor_id);
             if ($mentor->role_id !== 2) {
                 return response()->json([
@@ -160,11 +160,11 @@ class MentoringController extends Controller
                             'data entered invalid'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
             $mentoring->mentor_id = $request->mentor_id;
         }
-        if (isset ($request->participant_id)) {
+        if (isset($request->participant_id)) {
             $participant = User::find($request->participant_id);
             if ($participant->role_id !== 3) {
                 return response()->json([
@@ -173,7 +173,7 @@ class MentoringController extends Controller
                             'data entered invalid'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
             $mentoring->participant_id = $request->participant_id;
         }
@@ -185,7 +185,7 @@ class MentoringController extends Controller
                         'division data is not the same'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         try {
@@ -197,7 +197,7 @@ class MentoringController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return new MentoringResource($mentoring);
@@ -213,7 +213,7 @@ class MentoringController extends Controller
                         'non-admin role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $mentoring = Mentoring::find($request->id);
@@ -226,7 +226,7 @@ class MentoringController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         return response()->json([
