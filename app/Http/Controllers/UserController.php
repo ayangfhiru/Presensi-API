@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AdminUserUpdateRequest;
-use App\Http\Resources\NullResource;
 use App\Models\Role;
 use App\Models\User;
 use App\Mail\LoginEmail;
@@ -32,7 +31,7 @@ class UserController extends Controller
                         'non-admin role'
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         if (User::where('email', $request->email)->count() == 1) {
@@ -42,7 +41,7 @@ class UserController extends Controller
                         'email alredy registered'
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         if (User::where('phone', $request->phone)->count() == 1) {
@@ -52,7 +51,7 @@ class UserController extends Controller
                         'phone alredy registered'
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         $newUser = new User($request->all());
@@ -69,7 +68,7 @@ class UserController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         $mailData = [
@@ -127,7 +126,7 @@ class UserController extends Controller
                         'non-admin or mentor role'
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         try {
@@ -139,7 +138,7 @@ class UserController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return UserResource::collection($getUser);
     }
@@ -148,22 +147,22 @@ class UserController extends Controller
     {
         $request->validated();
         $user = Auth::user();
-        if ($user->role_id !== 1) {
+        if ($user->role_id != 1) {
             return response()->json([
                 'errors' => [
                     'message' => [
-                        'non-admin or mentor role'
+                        'non-admin role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $updateUser = User::find($request->id);
 
-        if (isset ($request->status)) {
+        if (isset($request->status)) {
             $updateUser->status = $request->status;
         }
-        if (isset ($request->role)) {
+        if (isset($request->role)) {
             $role = Role::find($request->role);
             if ($role == null) {
                 return response()->json([
@@ -172,11 +171,11 @@ class UserController extends Controller
                             'role not found'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
             $updateUser->role_id = $request->role;
         }
-        if (isset ($request->division)) {
+        if (isset($request->division)) {
             $division = Division::find($request->division);
             if ($division == null) {
                 return response()->json([
@@ -185,11 +184,11 @@ class UserController extends Controller
                             'division not found'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
             $updateUser->division_id = $request->division;
         }
-        if (isset ($request->password)) {
+        if (isset($request->password)) {
             $newPassword = $request->password;
             $updateUser->password = Hash::make($newPassword);
         }
@@ -203,7 +202,7 @@ class UserController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         return new UserResource($updateUser);
@@ -220,7 +219,7 @@ class UserController extends Controller
                         'non-admin role'
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
 
         if ($deleteUser == null) {
@@ -230,7 +229,7 @@ class UserController extends Controller
                         'data not found'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         if ($deleteUser->role_id == 1) {
@@ -242,7 +241,7 @@ class UserController extends Controller
                             'admin user cannot be empty'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
         }
 
@@ -255,7 +254,7 @@ class UserController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         return response()->json([

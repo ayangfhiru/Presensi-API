@@ -50,7 +50,7 @@ class PresenceController extends Controller
                         'non-participant role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
         $today = date('Y-m-d');
         $epochToday = $this->dateToEpoch($today);
@@ -69,7 +69,7 @@ class PresenceController extends Controller
             if ($validator->fails()) {
                 throw new HttpResponseException(response([
                     "errors" => $validator->getMessageBag()
-                ], 400));
+                ], 404));
             }
 
             $epochExit = $this->dateToEpoch($request->exit_time);
@@ -102,7 +102,7 @@ class PresenceController extends Controller
             if ($validator->fails()) {
                 throw new HttpResponseException(response([
                     "errors" => $validator->getMessageBag()
-                ], 400));
+                ], 404));
             }
 
             $mentoring = Mentoring::where('participant_id', '=', $user->id)->first();
@@ -214,7 +214,7 @@ class PresenceController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return PresenceResource::collection($presence);
     }
@@ -229,7 +229,7 @@ class PresenceController extends Controller
                         'enter the data you want to update!'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
         $user = Auth::user();
         if ($user->role_id == 3) {
@@ -239,7 +239,7 @@ class PresenceController extends Controller
                         'non-admin or mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $presence = Presence::where('id', '=', $request->id)->first();
@@ -258,7 +258,7 @@ class PresenceController extends Controller
                         'id presence is wrong'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         if (isset($request->date)) {
@@ -281,7 +281,7 @@ class PresenceController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return new PresenceResource($presence);
     }
@@ -296,7 +296,7 @@ class PresenceController extends Controller
                         'non-admin or mentor role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $presence = Presence::find($request->id);
@@ -309,7 +309,7 @@ class PresenceController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return response()->json([
             'data' => true

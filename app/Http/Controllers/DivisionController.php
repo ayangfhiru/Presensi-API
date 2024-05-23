@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Division;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +23,7 @@ class DivisionController extends Controller
                         'non-admin role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $validation = Validator::make($request->all(), [
@@ -33,7 +32,7 @@ class DivisionController extends Controller
         if ($validation->fails()) {
             return response()->json([
                 'errors' => $validation->errors()
-            ], 400);
+            ], 404);
         }
 
         $division = new Division($request->all());
@@ -46,7 +45,7 @@ class DivisionController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
         return (new DivisionResource($division))->response()->setStatusCode(201);
     }
@@ -70,7 +69,7 @@ class DivisionController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return DivisionResource::collection($division);
     }
@@ -85,7 +84,7 @@ class DivisionController extends Controller
                         'non-admin role'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
 
         $division = Division::find($request->id);
@@ -96,9 +95,9 @@ class DivisionController extends Controller
                         'data division is null'
                     ]
                 ]
-            ], 400);
+            ], 404);
         }
-        
+
         try {
             $division->delete();
         } catch (QueryException $err) {
@@ -109,7 +108,7 @@ class DivisionController extends Controller
                             'cannot be deleted, because the data is connected by relations'
                         ]
                     ]
-                ], 400);
+                ], 404);
             }
             throw new HttpResponseException(response([
                 'errors' => [
@@ -117,7 +116,7 @@ class DivisionController extends Controller
                         $err->errorInfo[2]
                     ]
                 ]
-            ], 400));
+            ], 404));
         }
         return response()->json([
             'data' => true
